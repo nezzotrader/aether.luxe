@@ -26,15 +26,8 @@ export const authOptions: NextAuthOptions = {
 
         const email = credentials?.email?.trim().toLowerCase();
         const password = credentials?.password || "";
-        console.log("INPUT PASSWORD:", password);
-        console.log("INPUT PASSWORD LENGTH:", password.length);
         const isEmailValid = email === adminEmail.trim().toLowerCase();
         const isPasswordValid = password === adminPassword;
-        console.log("HASH FROM ENV:", adminPasswordHash);
-        console.log("PASSWORD VALID:", isPasswordValid);
-        console.log("INPUT EMAIL:", email);
-        console.log("ENV EMAIL:", adminEmail);
-        console.log("PASSWORD VALID:", isPasswordValid);
 
         if (!isEmailValid || !isPasswordValid) {
           return null;
