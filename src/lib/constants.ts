@@ -1,11 +1,18 @@
 export const BRANDS = [
   "Louis Vuitton",
+  "Christian Louboutin",
   "Chanel",
   "Dior",
   "Hermès",
   "Gucci",
   "Prada",
   "Balenciaga",
+  "Saint Laurent",
+  "Fendi",
+  "Givenchy",
+  "Bottega Veneta",
+  "Polo Ralph Lauren",
+  "Burberry",
 ] as const;
 
 export const CATEGORIES = [
