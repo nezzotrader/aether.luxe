@@ -21,7 +21,7 @@ export const authOptions: NextAuthOptions = {
         const adminPassword = process.env.ADMIN_PASSWORD;
 
         if (!adminEmail || !adminPassword) {
-          throw new Error("Admin credentials are not configured.");
+          throw new Error("Admin credentials salah.");
         }
 
         const email = credentials?.email?.trim().toLowerCase();
