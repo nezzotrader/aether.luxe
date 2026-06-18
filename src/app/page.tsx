@@ -52,14 +52,11 @@ export default async function Home({ searchParams }: HomeProps) {
                 Modern luxury catalog
               </p>
               <h1 className="mt-5 max-w-4xl font-display text-5xl font-semibold leading-[0.96] text-white sm:text-7xl">
-                Curated pieces for a private, refined wardrobe.
+                Pre-order now, arrive in 5-9 business days.
               </h1>
             </div>
             <p className="max-w-xl text-base leading-7 text-white/60 lg:justify-self-end">
-              Aether Luxe by Azfar presents a focused digital catalog of
-              luxury bags, apparel, watches, and accessories. Browse with
-              intent, inspect the details, and order through the dedicated
-              Google Form.
+              Not Authentic but high quality. Highest quality replica products from the most reputable factories. We ensure that every piece in our collection meets our strict standards for craftsmanship and materials, so you can shop with confidence knowing you're getting the best of the best.
             </p>
           </div>
           <div className="silver-line mt-10 h-px w-full" />

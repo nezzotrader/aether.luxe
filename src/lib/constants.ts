@@ -1,6 +1,7 @@
 export const BRANDS = [
   "Louis Vuitton",
   "Christian Louboutin",
+  "Chrome Hearts",
   "Chanel",
   "Dior",
   "Hermès",
