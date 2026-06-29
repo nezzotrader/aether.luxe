@@ -10,6 +10,4 @@ const BrandSchema = new Schema(
   },
 );
 
-BrandSchema.index({ name: 1 });
-
 export const BrandModel = models.Brand || model("Brand", BrandSchema);

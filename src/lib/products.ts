@@ -88,7 +88,7 @@ export async function getProducts(query: ProductQuery = {}) {
   }
 
   if (query.activeOnly) {
-    filter.isActive = true;
+    filter.isActive = { $ne: false };
   }
 
   const [items, total] = await Promise.all([

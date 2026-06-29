@@ -178,25 +178,6 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </section>
 
-        <section
-          id="about"
-          className="mx-auto grid max-w-7xl gap-6 px-4 py-14 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8"
-        >
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-white/45">
-              About us
-            </p>
-            <h2 className="mt-3 font-display text-4xl font-semibold text-white">
-              Aether is built for clean browsing and confident ordering.
-            </h2>
-          </div>
-          <p className="text-base leading-8 text-white/62">
-            Browse multiple product images from the main catalog, add items to
-            cart, checkout by QR transfer with receipt attachment, or use Stripe
-            card payment. Admin can manage catalog items, brands, and order
-            confirmation from one private panel.
-          </p>
-        </section>
       </main>
       <Footer />
     </>

@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { label: "Home", href: "/" },
   { label: "Catalog", href: "/#catalog" },
   { label: "Brands", href: "/#brands" },
-  { label: "About Us", href: "/#about" },
+  { label: "About Us", href: "/about" },
 ];
 
 export function Header({ search = "" }: HeaderProps) {

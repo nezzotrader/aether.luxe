@@ -2,20 +2,26 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CreditCard, Minus, Plus, QrCode, Trash2, Upload } from "lucide-react";
 import { useCart } from "@/components/CartProvider";
 import { formatPrice } from "@/lib/format";
-
-const qrImage = process.env.NEXT_PUBLIC_QR_PAYMENT_IMAGE_URL || "";
 
 export function CartCheckout() {
   const { items, total, updateQuantity, removeItem, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState<"qr" | "stripe">("qr");
   const [receiptUrl, setReceiptUrl] = useState("");
+  const [qrImage, setQrImage] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const canCheckout = useMemo(() => items.length > 0, [items]);
+
+  useEffect(() => {
+    fetch("/api/store-config", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data) => setQrImage(data.qrPaymentImageUrl || ""))
+      .catch(() => setQrImage(""));
+  }, []);
 
   async function uploadReceipt(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -204,7 +210,8 @@ export function CartCheckout() {
                 </div>
               ) : (
                 <p className="text-sm leading-6 text-white/55">
-                  Add `NEXT_PUBLIC_QR_PAYMENT_IMAGE_URL` to `.env.local` to show your QR image here.
+                  Add `QR_PAYMENT_IMAGE_URL` or `NEXT_PUBLIC_QR_PAYMENT_IMAGE_URL`
+                  in Vercel, then redeploy to show your QR image here.
                 </p>
               )}
               <label className="mt-4 flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-white/10 text-sm font-semibold text-white/75 transition hover:border-white/35">
