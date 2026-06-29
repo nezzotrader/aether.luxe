@@ -36,3 +36,7 @@ export const SORT_OPTIONS = [
 export const PRODUCTS_PER_PAGE = 12;
 export const CURRENCY = "MYR";
 export const PAYMENT_METHODS = ["qr", "stripe"] as const;
+export const SHIPPING_OPTIONS = {
+  Malaysia: 15,
+  Singapore: 30,
+} as const;

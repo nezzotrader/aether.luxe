@@ -52,7 +52,6 @@ export default async function Home({ searchParams }: HomeProps) {
     }),
   ]);
   const { products, total, pages } = productResult;
-  const heroProduct = products[0];
 
   return (
     <>
@@ -60,12 +59,10 @@ export default async function Home({ searchParams }: HomeProps) {
       <main>
         <section className="relative overflow-hidden border-b border-white/10 bg-[#0b0506]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(120,20,42,0.32),transparent_34%),linear-gradient(90deg,rgba(0,0,0,0.82),rgba(0,0,0,0.3))]" />
-          {heroProduct?.images[0] ? (
-            <div
-              className="absolute inset-y-0 right-0 hidden w-3/5 bg-cover bg-center opacity-55 md:block"
-              style={{ backgroundImage: `url(${heroProduct.images[0]})` }}
-            />
-          ) : null}
+          <div
+            className="absolute inset-y-0 right-0 hidden w-3/5 bg-cover bg-center opacity-55 md:block"
+            style={{ backgroundImage: "url('/featured-lv-bag.jpg')" }}
+          />
           <div className="relative mx-auto grid min-h-[430px] max-w-7xl items-center px-4 py-16 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/55">
@@ -137,9 +134,14 @@ export default async function Home({ searchParams }: HomeProps) {
           />
 
           {products.length ? (
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="mt-8 flex snap-x gap-3 overflow-x-auto pb-4 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3 xl:grid-cols-5">
               {products.map((product) => (
-                <ProductCard key={product._id} product={product} />
+                <div
+                  key={product._id}
+                  className="w-[calc(50%-0.375rem)] min-w-[calc(50%-0.375rem)] snap-start sm:w-auto sm:min-w-0"
+                >
+                  <ProductCard product={product} />
+                </div>
               ))}
             </div>
           ) : (

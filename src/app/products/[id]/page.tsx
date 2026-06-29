@@ -69,6 +69,22 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
                   {product.isActive ? "Active" : "Inactive"}
                 </dd>
               </div>
+              {product.colors?.length ? (
+                <div>
+                  <dt className="text-white/40">Colours</dt>
+                  <dd className="mt-1 font-medium text-white">
+                    {product.colors.join(", ")}
+                  </dd>
+                </div>
+              ) : null}
+              {product.sizes?.length ? (
+                <div>
+                  <dt className="text-white/40">Sizes</dt>
+                  <dd className="mt-1 font-medium text-white">
+                    {product.sizes.join(", ")}
+                  </dd>
+                </div>
+              ) : null}
             </dl>
 
             <p className="mt-7 text-base leading-7 text-white/62">

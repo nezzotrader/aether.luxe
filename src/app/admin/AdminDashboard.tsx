@@ -10,6 +10,7 @@ import {
   ExternalLink,
   LayoutDashboard,
   LogOut,
+  Percent,
   Pencil,
   Plus,
   Save,
@@ -19,12 +20,13 @@ import {
 } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
-import type { Brand, Order, Product, ProductPayload } from "@/types/product";
+import type { Brand, Order, Product, ProductPayload, PromoCode } from "@/types/product";
 
 type AdminDashboardProps = {
   initialProducts: Product[];
   initialBrands: Brand[];
   initialOrders: Order[];
+  initialPromos: PromoCode[];
 };
 
 function makeEmptyProduct(brand = ""): ProductPayload {
@@ -36,25 +38,49 @@ function makeEmptyProduct(brand = ""): ProductPayload {
     description: "",
     productCode: "",
     images: [],
+    colors: [],
+    sizes: [],
     isActive: true,
   };
+}
+
+function splitOptions(value: string) {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function joinOptions(value?: string[]) {
+  return value?.join(", ") || "";
 }
 
 export function AdminDashboard({
   initialProducts,
   initialBrands,
   initialOrders,
+  initialPromos,
 }: AdminDashboardProps) {
-  const [tab, setTab] = useState<"products" | "brands" | "orders">("products");
+  const [tab, setTab] = useState<"products" | "brands" | "promos" | "orders">("products");
   const [products, setProducts] = useState(initialProducts);
   const [brands, setBrands] = useState(initialBrands);
   const [orders, setOrders] = useState(initialOrders);
+  const [promos, setPromos] = useState(initialPromos);
   const [productForm, setProductForm] = useState<ProductPayload>(
     makeEmptyProduct(initialBrands[0]?.name || ""),
   );
+  const [productColorsInput, setProductColorsInput] = useState("");
+  const [productSizesInput, setProductSizesInput] = useState("");
   const [brandForm, setBrandForm] = useState({ name: "", isActive: true });
+  const [promoForm, setPromoForm] = useState({
+    code: "",
+    type: "fixed" as "fixed" | "percent",
+    value: 0,
+    isActive: true,
+  });
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
+  const [editingPromoId, setEditingPromoId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -62,6 +88,13 @@ export function AdminDashboard({
   const activeProducts = useMemo(
     () => products.filter((product) => product.isActive).length,
     [products],
+  );
+  const pendingOrders = useMemo(
+    () =>
+      orders.filter((order) =>
+        ["pending_receipt", "pending_stripe", "paid"].includes(order.paymentStatus),
+      ).length,
+    [orders],
   );
 
   async function refreshProducts() {
@@ -82,14 +115,27 @@ export function AdminDashboard({
     setOrders(data.orders || []);
   }
 
+  async function refreshPromos() {
+    const response = await fetch("/api/promos");
+    const data = await response.json();
+    setPromos(data.promos || []);
+  }
+
   function resetProductForm() {
     setEditingProductId(null);
     setProductForm(makeEmptyProduct(brands[0]?.name || ""));
+    setProductColorsInput("");
+    setProductSizesInput("");
   }
 
   function resetBrandForm() {
     setEditingBrandId(null);
     setBrandForm({ name: "", isActive: true });
+  }
+
+  function resetPromoForm() {
+    setEditingPromoId(null);
+    setPromoForm({ code: "", type: "fixed", value: 0, isActive: true });
   }
 
   async function handleProductUpload(event: React.ChangeEvent<HTMLInputElement>) {
@@ -163,8 +209,12 @@ export function AdminDashboard({
       description: product.description,
       productCode: product.productCode,
       images: product.images,
+      colors: product.colors || [],
+      sizes: product.sizes || [],
       isActive: product.isActive,
     });
+    setProductColorsInput(joinOptions(product.colors));
+    setProductSizesInput(joinOptions(product.sizes));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -225,6 +275,47 @@ export function AdminDashboard({
     await refreshBrands();
   }
 
+  async function savePromo(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+    setMessage("");
+    const response = await fetch(
+      editingPromoId ? `/api/promos/${editingPromoId}` : "/api/promos",
+      {
+        method: editingPromoId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(promoForm),
+      },
+    );
+    const data = await response.json();
+    setSaving(false);
+
+    if (!response.ok) {
+      setMessage(data.message || "Promo could not be saved.");
+      return;
+    }
+
+    resetPromoForm();
+    await refreshPromos();
+    setMessage("Promo saved.");
+  }
+
+  async function deletePromo(id: string) {
+    if (!window.confirm("Delete this promo code?")) {
+      return;
+    }
+
+    const response = await fetch(`/api/promos/${id}`, { method: "DELETE" });
+
+    if (!response.ok) {
+      const data = await response.json();
+      setMessage(data.message || "Promo could not be deleted.");
+      return;
+    }
+
+    await refreshPromos();
+  }
+
   async function updateOrder(id: string, paymentStatus: Order["paymentStatus"]) {
     const response = await fetch(`/api/orders/${id}`, {
       method: "PUT",
@@ -239,6 +330,25 @@ export function AdminDashboard({
     }
 
     await refreshOrders();
+    setMessage(
+      paymentStatus === "confirmed"
+        ? "Order confirmed. Invoice is available for the customer."
+        : "Order rejected and deleted.",
+    );
+  }
+
+  function invoiceUrl(orderId: string) {
+    const origin = typeof window === "undefined" ? "" : window.location.origin;
+    return `${origin}/invoice/${orderId}`;
+  }
+
+  function invoiceMailto(order: Order) {
+    const url = invoiceUrl(order._id);
+    return `mailto:${order.customerEmail}?subject=${encodeURIComponent(
+      "Aether invoice",
+    )}&body=${encodeURIComponent(
+      `Hi ${order.customerName}, your Aether invoice is ready: ${url}`,
+    )}`;
   }
 
   return (
@@ -256,6 +366,7 @@ export function AdminDashboard({
           {[
             ["products", "Products", Boxes],
             ["brands", "Brands", Building2],
+            ["promos", "Promos", Percent],
             ["orders", "Orders", ShoppingBag],
           ].map(([value, label, Icon]) => {
             const LucideIcon = Icon as typeof LayoutDashboard;
@@ -263,7 +374,7 @@ export function AdminDashboard({
               <button
                 key={value as string}
                 type="button"
-                onClick={() => setTab(value as "products" | "brands" | "orders")}
+                onClick={() => setTab(value as "products" | "brands" | "promos" | "orders")}
                 className={`inline-flex h-11 items-center justify-center gap-2 rounded-md px-3 text-sm lg:justify-start ${
                   tab === value
                     ? "bg-[#8b1d32] text-white"
@@ -272,6 +383,11 @@ export function AdminDashboard({
               >
                 <LucideIcon className="size-4" aria-hidden="true" />
                 {label as string}
+                {value === "orders" && pendingOrders ? (
+                  <span className="ml-auto grid size-5 place-items-center rounded-full bg-white text-xs font-bold text-black">
+                    {pendingOrders}
+                  </span>
+                ) : null}
               </button>
             );
           })}
@@ -293,7 +409,13 @@ export function AdminDashboard({
               Dashboard
             </p>
             <h1 className="font-display text-4xl font-semibold text-white">
-              {tab === "products" ? "Products" : tab === "brands" ? "Brands" : "Orders"}
+              {tab === "products"
+                ? "Products"
+                : tab === "brands"
+                  ? "Brands"
+                  : tab === "promos"
+                    ? "Promos"
+                    : "Orders"}
             </h1>
           </div>
           <Link
@@ -342,6 +464,13 @@ export function AdminDashboard({
                             <div>
                               <p className="font-medium text-white">{product.name}</p>
                               <p className="text-xs text-white/40">SKU: {product.productCode}</p>
+                              {product.colors?.length || product.sizes?.length ? (
+                                <p className="mt-1 text-xs text-white/35">
+                                  {[product.colors?.length ? `Colours: ${joinOptions(product.colors)}` : "", product.sizes?.length ? `Sizes: ${joinOptions(product.sizes)}` : ""]
+                                    .filter(Boolean)
+                                    .join(" / ")}
+                                </p>
+                              ) : null}
                             </div>
                           </div>
                         </td>
@@ -399,6 +528,32 @@ export function AdminDashboard({
                 <div className="grid grid-cols-2 gap-3">
                   <input type="number" min="0" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: Number(event.target.value) })} required placeholder="Price" className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white" />
                   <input value={productForm.productCode} onChange={(event) => setProductForm({ ...productForm, productCode: event.target.value })} required placeholder="SKU" className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    value={productColorsInput}
+                    onChange={(event) => {
+                      setProductColorsInput(event.target.value);
+                      setProductForm({
+                        ...productForm,
+                        colors: splitOptions(event.target.value),
+                      });
+                    }}
+                    placeholder="Colours e.g. Black, White"
+                    className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white placeholder:text-white/35"
+                  />
+                  <input
+                    value={productSizesInput}
+                    onChange={(event) => {
+                      setProductSizesInput(event.target.value);
+                      setProductForm({
+                        ...productForm,
+                        sizes: splitOptions(event.target.value),
+                      });
+                    }}
+                    placeholder="Sizes e.g. S, M, 42"
+                    className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white placeholder:text-white/35"
+                  />
                 </div>
                 <textarea value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} required rows={4} placeholder="Description" className="w-full rounded-md border border-white/10 bg-[#170d0f] px-3 py-3 text-sm text-white" />
                 <label className="flex items-center gap-2 text-sm text-white/70">
@@ -467,6 +622,128 @@ export function AdminDashboard({
           </div>
         ) : null}
 
+        {tab === "promos" ? (
+          <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+            <div className="rounded-lg border border-white/10 bg-[#100809] p-4">
+              <h2 className="font-display text-3xl text-white">Promo Codes</h2>
+              <div className="mt-4 grid gap-2">
+                {promos.map((promo) => (
+                  <div
+                    key={promo._id}
+                    className="flex items-center justify-between rounded-md border border-white/10 p-3"
+                  >
+                    <div>
+                      <p className="font-semibold text-white">{promo.code}</p>
+                      <p className="text-xs text-white/45">
+                        {promo.type === "percent"
+                          ? `${promo.value}% off`
+                          : `${formatPrice(promo.value)} off`}{" "}
+                        / {promo.isActive ? "Active" : "Inactive"}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingPromoId(promo._id);
+                          setPromoForm({
+                            code: promo.code,
+                            type: promo.type,
+                            value: promo.value,
+                            isActive: promo.isActive,
+                          });
+                        }}
+                        className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70"
+                      >
+                        <Pencil className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deletePromo(promo._id)}
+                        className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {!promos.length ? (
+                  <p className="rounded-md border border-white/10 p-4 text-sm text-white/50">
+                    No promo codes yet.
+                  </p>
+                ) : null}
+              </div>
+            </div>
+            <form
+              onSubmit={savePromo}
+              className="rounded-lg border border-white/10 bg-[#100809] p-5"
+            >
+              <h2 className="font-display text-3xl text-white">
+                {editingPromoId ? "Edit Promo" : "Add Promo"}
+              </h2>
+              <input
+                value={promoForm.code}
+                onChange={(event) =>
+                  setPromoForm({ ...promoForm, code: event.target.value })
+                }
+                required
+                placeholder="Code e.g. AETHER10"
+                className="mt-4 h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm uppercase text-white"
+              />
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <select
+                  value={promoForm.type}
+                  onChange={(event) =>
+                    setPromoForm({
+                      ...promoForm,
+                      type: event.target.value as "fixed" | "percent",
+                    })
+                  }
+                  className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white"
+                >
+                  <option value="fixed">Fixed RM</option>
+                  <option value="percent">Percent %</option>
+                </select>
+                <input
+                  type="number"
+                  min="0"
+                  value={promoForm.value}
+                  onChange={(event) =>
+                    setPromoForm({ ...promoForm, value: Number(event.target.value) })
+                  }
+                  className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white"
+                />
+              </div>
+              <label className="mt-4 flex items-center gap-2 text-sm text-white/70">
+                <input
+                  type="checkbox"
+                  checked={promoForm.isActive}
+                  onChange={(event) =>
+                    setPromoForm({ ...promoForm, isActive: event.target.checked })
+                  }
+                />
+                Active
+              </label>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={resetPromoForm}
+                  className="h-11 rounded-md border border-white/10 text-sm text-white/70"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="h-11 rounded-md bg-[#8b1d32] text-sm font-semibold text-white"
+                >
+                  Save Promo
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : null}
+
         {tab === "orders" ? (
           <div className="grid gap-4">
             {orders.map((order) => (
@@ -480,15 +757,37 @@ export function AdminDashboard({
                   <div className="text-left sm:text-right">
                     <p className="font-semibold text-white">{formatPrice(order.total)}</p>
                     <p className="text-xs uppercase tracking-[0.18em] text-white/45">{order.paymentMethod} / {order.paymentStatus}</p>
+                    {order.invoiceNumber ? (
+                      <p className="mt-1 text-xs text-white/45">{order.invoiceNumber}</p>
+                    ) : null}
                   </div>
                 </div>
                 <div className="mt-4 grid gap-2">
                   {order.items.map((item) => (
-                    <div key={`${order._id}-${item.productId}`} className="flex justify-between text-sm text-white/60">
-                      <span>{item.quantity} x {item.name}</span>
+                    <div key={`${order._id}-${item.cartItemId || item.productId}`} className="flex justify-between gap-4 text-sm text-white/60">
+                      <span>
+                        {item.quantity} x {item.name}
+                        {item.color || item.size ? (
+                          <span className="block text-xs text-white/40">
+                            {[item.color ? `Colour: ${item.color}` : "", item.size ? `Size: ${item.size}` : ""]
+                              .filter(Boolean)
+                              .join(" / ")}
+                          </span>
+                        ) : null}
+                      </span>
                       <span>{formatPrice(item.price * item.quantity)}</span>
                     </div>
                   ))}
+                  <div className="flex justify-between text-sm text-white/45">
+                    <span>Shipping ({order.shippingCountry})</span>
+                    <span>{formatPrice(order.shippingFee)}</span>
+                  </div>
+                  {order.discount ? (
+                    <div className="flex justify-between text-sm text-green-200/80">
+                      <span>Promo {order.promoCode}</span>
+                      <span>-{formatPrice(order.discount)}</span>
+                    </div>
+                  ) : null}
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {order.receiptUrl ? (
@@ -496,6 +795,12 @@ export function AdminDashboard({
                   ) : null}
                   <button type="button" onClick={() => updateOrder(order._id, "confirmed")} className="h-10 rounded-md bg-green-700 px-3 text-sm font-semibold text-white">Confirm</button>
                   <button type="button" onClick={() => updateOrder(order._id, "rejected")} className="h-10 rounded-md bg-red-800 px-3 text-sm font-semibold text-white">Reject</button>
+                  {order.paymentStatus === "confirmed" ? (
+                    <>
+                      <a href={`/invoice/${order._id}`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center rounded-md border border-white/10 px-3 text-sm text-white/75">Invoice</a>
+                      <a href={invoiceMailto(order)} className="inline-flex h-10 items-center rounded-md border border-white/10 px-3 text-sm text-white/75">Email invoice</a>
+                    </>
+                  ) : null}
                 </div>
               </article>
             ))}

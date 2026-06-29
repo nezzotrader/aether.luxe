@@ -27,7 +27,25 @@ export async function PUT(request: Request, context: OrderRouteContext) {
 
   const { id } = await context.params;
   await connectToDatabase();
-  const order = await OrderModel.findByIdAndUpdate(id, parsed.data, {
+
+  if (parsed.data.paymentStatus === "rejected") {
+    const deleted = await OrderModel.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return NextResponse.json({ message: "Order not found." }, { status: 404 });
+    }
+
+    return NextResponse.json({ ok: true, deleted: true });
+  }
+
+  const update =
+    parsed.data.paymentStatus === "confirmed"
+      ? {
+          paymentStatus: "confirmed",
+          invoiceNumber: `AETH-${new Date().getFullYear()}-${id.slice(-6).toUpperCase()}`,
+        }
+      : parsed.data;
+  const order = await OrderModel.findByIdAndUpdate(id, update, {
     new: true,
     runValidators: true,
   });

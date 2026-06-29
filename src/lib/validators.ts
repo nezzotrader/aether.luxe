@@ -9,6 +9,8 @@ export const productSchema = z.object({
   description: z.string().trim().min(10, "Description is required."),
   productCode: z.string().trim().min(2, "Product code is required."),
   images: z.array(z.string().url()).min(1, "Upload at least one image."),
+  colors: z.array(z.string().trim().min(1)).default([]),
+  sizes: z.array(z.string().trim().min(1)).default([]),
   isActive: z.boolean().default(true),
 });
 
@@ -18,12 +20,15 @@ export const brandSchema = z.object({
 });
 
 export const cartItemSchema = z.object({
+  cartItemId: z.string().trim().optional(),
   productId: z.string().trim().min(1),
   name: z.string().trim().min(1),
   brand: z.string().trim().min(1),
   price: z.coerce.number().nonnegative(),
   image: z.string().url(),
   productCode: z.string().trim().min(1),
+  color: z.string().trim().optional(),
+  size: z.string().trim().optional(),
   quantity: z.coerce.number().int().min(1).max(99),
 });
 
@@ -32,9 +37,23 @@ export const checkoutSchema = z.object({
   customerEmail: z.string().trim().email("A valid email is required."),
   customerPhone: z.string().trim().min(6, "Phone number is required."),
   shippingAddress: z.string().trim().min(8, "Delivery address is required."),
+  shippingCountry: z.enum(["Malaysia", "Singapore"]).default("Malaysia"),
+  promoCode: z.string().trim().optional(),
   paymentMethod: z.enum(PAYMENT_METHODS),
   receiptUrl: z.string().url().optional(),
   items: z.array(cartItemSchema).min(1, "Cart is empty."),
+});
+
+export const promoCodeSchema = z.object({
+  code: z.string().trim().min(2, "Promo code is required.").transform((value) => value.toUpperCase()),
+  type: z.enum(["fixed", "percent"]),
+  value: z.coerce.number().nonnegative("Promo value must be 0 or higher."),
+  isActive: z.boolean().default(true),
+});
+
+export const promoValidationSchema = z.object({
+  code: z.string().trim().min(1).transform((value) => value.toUpperCase()),
+  subtotal: z.coerce.number().nonnegative(),
 });
 
 export const orderStatusSchema = z.object({

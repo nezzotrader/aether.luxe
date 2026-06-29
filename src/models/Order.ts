@@ -2,12 +2,15 @@ import { Schema, model, models } from "mongoose";
 
 const OrderItemSchema = new Schema(
   {
+    cartItemId: { type: String, trim: true },
     productId: { type: String, required: true },
     name: { type: String, required: true },
     brand: { type: String, required: true },
     price: { type: Number, required: true, min: 0 },
     image: { type: String, required: true },
     productCode: { type: String, required: true },
+    color: { type: String, trim: true },
+    size: { type: String, trim: true },
     quantity: { type: Number, required: true, min: 1 },
   },
   { _id: false },
@@ -19,6 +22,15 @@ const OrderSchema = new Schema(
     customerEmail: { type: String, required: true, trim: true },
     customerPhone: { type: String, required: true, trim: true },
     shippingAddress: { type: String, required: true, trim: true },
+    shippingCountry: {
+      type: String,
+      enum: ["Malaysia", "Singapore"],
+      default: "Malaysia",
+    },
+    shippingFee: { type: Number, default: 15, min: 0 },
+    subtotal: { type: Number, required: true, min: 0 },
+    promoCode: { type: String, trim: true, uppercase: true },
+    discount: { type: Number, default: 0, min: 0 },
     items: { type: [OrderItemSchema], required: true },
     total: { type: Number, required: true, min: 0 },
     paymentMethod: { type: String, enum: ["qr", "stripe"], required: true },
@@ -29,6 +41,7 @@ const OrderSchema = new Schema(
     },
     receiptUrl: { type: String },
     stripeSessionId: { type: String },
+    invoiceNumber: { type: String },
   },
   {
     timestamps: { createdAt: true, updatedAt: true },

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { CURRENCY } from "@/lib/constants";
+import { CURRENCY, SHIPPING_OPTIONS } from "@/lib/constants";
 import { connectToDatabase } from "@/lib/db";
 import { serializeOrder } from "@/lib/orders";
+import { calculateDiscount } from "@/lib/promos";
 import { getStripe } from "@/lib/stripe";
 import { checkoutSchema } from "@/lib/validators";
 import { OrderModel } from "@/models/Order";
@@ -18,16 +19,27 @@ export async function POST(request: Request) {
     );
   }
 
-  const total = parsed.data.items.reduce(
+  const subtotal = parsed.data.items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
+  const shippingFee = SHIPPING_OPTIONS[parsed.data.shippingCountry];
+  const { promoCode, discount } = await calculateDiscount(
+    parsed.data.promoCode,
+    subtotal,
+  );
+  const total = Math.max(subtotal + shippingFee - discount, 0);
   const origin = new URL(request.url).origin;
 
   try {
     await connectToDatabase();
     const order = await OrderModel.create({
       ...parsed.data,
+      customerEmail: parsed.data.customerEmail.toLowerCase(),
+      subtotal,
+      shippingFee,
+      promoCode,
+      discount,
       total,
       paymentMethod: "stripe",
       paymentStatus: "pending_stripe",
@@ -42,18 +54,19 @@ export async function POST(request: Request) {
       metadata: {
         orderId: order._id.toString(),
       },
-      line_items: parsed.data.items.map((item) => ({
-        quantity: item.quantity,
-        price_data: {
-          currency: CURRENCY.toLowerCase(),
-          unit_amount: Math.round(item.price * 100),
-          product_data: {
-            name: item.name,
-            description: `${item.brand} / ${item.productCode}`,
-            images: item.image ? [item.image] : undefined,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: CURRENCY.toLowerCase(),
+            unit_amount: Math.round(total * 100),
+            product_data: {
+              name: "Aether order",
+              description: `${parsed.data.items.length} item(s), shipping included`,
+            },
           },
         },
-      })),
+      ],
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/cart?payment=cancelled`,
     });

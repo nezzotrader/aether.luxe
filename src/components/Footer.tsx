@@ -1,4 +1,5 @@
 import { BadgeCheck, Clock, PackageCheck, Truck } from "lucide-react";
+import Link from "next/link";
 
 const FOOTER_ITEMS = [
   { title: "Curated Quality", body: "Checked catalog items", icon: BadgeCheck },
@@ -27,6 +28,10 @@ export function Footer() {
         })}
       </div>
       <div className="border-t border-white/10 px-4 py-6 text-center text-xs uppercase tracking-[0.22em] text-white/35">
+        <Link href="/orders" className="transition hover:text-white">
+          Order History
+        </Link>
+        <span className="mx-3">/</span>
         Aether Luxe by Azfar
       </div>
     </footer>

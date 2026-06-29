@@ -1,8 +1,10 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
+import { SHIPPING_OPTIONS } from "@/lib/constants";
 import { connectToDatabase } from "@/lib/db";
 import { getOrders, serializeOrder } from "@/lib/orders";
+import { calculateDiscount } from "@/lib/promos";
 import { checkoutSchema } from "@/lib/validators";
 import { OrderModel } from "@/models/Order";
 
@@ -36,14 +38,25 @@ export async function POST(request: Request) {
     );
   }
 
-  const total = parsed.data.items.reduce(
+  const subtotal = parsed.data.items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
+  const shippingFee = SHIPPING_OPTIONS[parsed.data.shippingCountry];
+  const { promoCode, discount } = await calculateDiscount(
+    parsed.data.promoCode,
+    subtotal,
+  );
+  const total = Math.max(subtotal + shippingFee - discount, 0);
 
   await connectToDatabase();
   const order = await OrderModel.create({
     ...parsed.data,
+    customerEmail: parsed.data.customerEmail.toLowerCase(),
+    subtotal,
+    shippingFee,
+    promoCode,
+    discount,
     total,
     paymentStatus:
       parsed.data.paymentMethod === "qr" ? "pending_receipt" : "pending_stripe",

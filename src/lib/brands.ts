@@ -25,6 +25,12 @@ export async function ensureDefaultBrands() {
   }
 
   await connectToDatabase();
+  const existingBrands = await BrandModel.estimatedDocumentCount();
+
+  if (existingBrands > 0) {
+    return;
+  }
+
   await Promise.all(
     DEFAULT_BRANDS.map((name) =>
       BrandModel.updateOne(

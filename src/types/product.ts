@@ -7,6 +7,8 @@ export type Product = {
   description: string;
   productCode: string;
   images: string[];
+  colors?: string[];
+  sizes?: string[];
   isActive: boolean;
   createdAt: string;
 };
@@ -21,12 +23,15 @@ export type Brand = {
 };
 
 export type CartItem = {
+  cartItemId: string;
   productId: string;
   name: string;
   brand: string;
   price: number;
   image: string;
   productCode: string;
+  color?: string;
+  size?: string;
   quantity: number;
 };
 
@@ -43,11 +48,26 @@ export type Order = {
   customerEmail: string;
   customerPhone: string;
   shippingAddress: string;
+  shippingCountry: "Malaysia" | "Singapore";
+  shippingFee: number;
+  subtotal: number;
+  promoCode?: string;
+  discount: number;
   items: CartItem[];
   total: number;
   paymentMethod: "qr" | "stripe";
   paymentStatus: OrderStatus;
   receiptUrl?: string;
   stripeSessionId?: string;
+  invoiceNumber?: string;
+  createdAt: string;
+};
+
+export type PromoCode = {
+  _id: string;
+  code: string;
+  type: "fixed" | "percent";
+  value: number;
+  isActive: boolean;
   createdAt: string;
 };

@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { getBrands } from "@/lib/brands";
 import { getOrders } from "@/lib/orders";
 import { getProducts } from "@/lib/products";
+import { getPromoCodes } from "@/lib/promos";
 import { AdminDashboard } from "./AdminDashboard";
 
 export const dynamic = "force-dynamic";
@@ -16,10 +17,11 @@ export default async function AdminPage() {
     redirect("/admin/login");
   }
 
-  const [{ products }, brands, orders] = await Promise.all([
+  const [{ products }, brands, orders, promos] = await Promise.all([
     getProducts({ sort: "newest", limit: 1000 }),
     getBrands(),
     getOrders(),
+    getPromoCodes(),
   ]);
 
   return (
@@ -29,6 +31,7 @@ export default async function AdminPage() {
         initialProducts={products}
         initialBrands={brands}
         initialOrders={orders}
+        initialPromos={promos}
       />
     </>
   );

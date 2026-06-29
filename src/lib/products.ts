@@ -12,6 +12,8 @@ type ProductDocument = {
   description: string;
   productCode: string;
   images: string[];
+  colors?: string[];
+  sizes?: string[];
   isActive?: boolean;
   createdAt: Date;
 };
@@ -36,6 +38,8 @@ export function serializeProduct(product: ProductDocument): Product {
     description: product.description,
     productCode: product.productCode,
     images: product.images,
+    colors: product.colors || [],
+    sizes: product.sizes || [],
     isActive: product.isActive ?? true,
     createdAt: product.createdAt.toISOString(),
   };

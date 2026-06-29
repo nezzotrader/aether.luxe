@@ -10,7 +10,7 @@ export function CartLink() {
   return (
     <Link
       href="/cart"
-      className="relative inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-3 text-sm text-white/80 transition hover:border-white/35 hover:text-white"
+      className="relative inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-2 text-sm text-white/80 transition hover:border-white/35 hover:text-white sm:px-3"
     >
       <ShoppingBag className="size-4" aria-hidden="true" />
       <span className="hidden sm:inline">Cart</span>
