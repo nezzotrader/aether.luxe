@@ -1,8 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AddToCartButton } from "@/components/AddToCartButton";
+import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { ORDER_FORM_URL } from "@/lib/constants";
+import { ProductImageCarousel } from "@/components/ProductImageCarousel";
 import { formatPrice } from "@/lib/format";
 import { getProductById } from "@/lib/products";
 
@@ -20,8 +21,6 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
     notFound();
   }
 
-  const [heroImage, ...detailImages] = product.images;
-
   return (
     <>
       <Header />
@@ -33,37 +32,9 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
           Back to catalog
         </Link>
 
-        <section className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
-          <div className="space-y-4">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-white/10 bg-[#111111]">
-              <Image
-                src={heroImage || "/swan.svg"}
-                alt={product.name}
-                fill
-                sizes="(min-width: 1024px) 58vw, 100vw"
-                className="object-cover"
-                priority
-              />
-            </div>
-
-            {detailImages.length ? (
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                {detailImages.map((image, index) => (
-                  <div
-                    key={image}
-                    className="relative aspect-square overflow-hidden rounded-lg border border-white/10 bg-[#111111]"
-                  >
-                    <Image
-                      src={image}
-                      alt={`${product.name} close-up detail ${index + 1}`}
-                      fill
-                      sizes="(min-width: 768px) 20vw, 50vw"
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : null}
+        <section className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
+          <div className="overflow-hidden rounded-lg border border-white/10 bg-[#111111]">
+            <ProductImageCarousel images={product.images} name={product.name} priority />
           </div>
 
           <aside className="lg:sticky lg:top-36 lg:self-start">
@@ -93,13 +64,9 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
                 <dd className="mt-1 font-medium text-white">{product.brand}</dd>
               </div>
               <div>
-                <dt className="text-white/40">Added</dt>
+                <dt className="text-white/40">Availability</dt>
                 <dd className="mt-1 font-medium text-white">
-                  {new Date(product.createdAt).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
+                  {product.isActive ? "Active" : "Inactive"}
                 </dd>
               </div>
             </dl>
@@ -108,22 +75,19 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
               {product.description}
             </p>
 
-            <div className="mt-10 rounded-lg border border-white/10 bg-[#111111] p-6">
-              <h2 className="font-display text-3xl font-semibold text-white">
-                Interested in ordering?
-              </h2>
-              <a
-                href={ORDER_FORM_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-white px-5 text-sm font-semibold text-black transition hover:bg-[#d9d9d9]"
+            <div className="mt-10 grid gap-3 sm:grid-cols-2">
+              <AddToCartButton product={product} />
+              <Link
+                href="/cart"
+                className="inline-flex h-12 w-full items-center justify-center rounded-md border border-white/15 px-5 text-sm font-semibold text-white transition hover:border-white/35"
               >
-                Order via Google Form
-              </a>
+                View cart
+              </Link>
             </div>
           </aside>
         </section>
       </main>
+      <Footer />
     </>
   );
 }

@@ -1,10 +1,10 @@
-export const BRANDS = [
+export const DEFAULT_BRANDS = [
   "Louis Vuitton",
   "Christian Louboutin",
   "Chrome Hearts",
   "Chanel",
   "Dior",
-  "Hermès",
+  "Hermes",
   "Gucci",
   "Prada",
   "Balenciaga",
@@ -34,4 +34,5 @@ export const SORT_OPTIONS = [
 ] as const;
 
 export const PRODUCTS_PER_PAGE = 12;
-export const ORDER_FORM_URL = "https://forms.gle/fT4yjSWAr6rvnaNh6";
+export const CURRENCY = "MYR";
+export const PAYMENT_METHODS = ["qr", "stripe"] as const;

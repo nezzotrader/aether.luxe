@@ -9,6 +9,7 @@ const ProductSchema = new Schema(
     description: { type: String, required: true, trim: true },
     productCode: { type: String, required: true, unique: true, trim: true },
     images: [{ type: String, required: true }],
+    isActive: { type: Boolean, default: true },
   },
   {
     timestamps: { createdAt: true, updatedAt: true },

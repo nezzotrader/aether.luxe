@@ -2,6 +2,8 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/Header";
 import { authOptions } from "@/lib/auth";
+import { getBrands } from "@/lib/brands";
+import { getOrders } from "@/lib/orders";
 import { getProducts } from "@/lib/products";
 import { AdminDashboard } from "./AdminDashboard";
 
@@ -14,12 +16,20 @@ export default async function AdminPage() {
     redirect("/admin/login");
   }
 
-  const { products } = await getProducts({ sort: "newest", limit: 1000 });
+  const [{ products }, brands, orders] = await Promise.all([
+    getProducts({ sort: "newest", limit: 1000 }),
+    getBrands(),
+    getOrders(),
+  ]);
 
   return (
     <>
       <Header />
-      <AdminDashboard initialProducts={products} />
+      <AdminDashboard
+        initialProducts={products}
+        initialBrands={brands}
+        initialOrders={orders}
+      />
     </>
   );
 }

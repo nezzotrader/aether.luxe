@@ -12,6 +12,7 @@ type ProductDocument = {
   description: string;
   productCode: string;
   images: string[];
+  isActive?: boolean;
   createdAt: Date;
 };
 
@@ -22,6 +23,7 @@ export type ProductQuery = {
   sort?: string;
   page?: number;
   limit?: number;
+  activeOnly?: boolean;
 };
 
 export function serializeProduct(product: ProductDocument): Product {
@@ -34,6 +36,7 @@ export function serializeProduct(product: ProductDocument): Product {
     description: product.description,
     productCode: product.productCode,
     images: product.images,
+    isActive: product.isActive ?? true,
     createdAt: product.createdAt.toISOString(),
   };
 }
@@ -82,6 +85,10 @@ export async function getProducts(query: ProductQuery = {}) {
 
   if (query.category) {
     filter.category = query.category;
+  }
+
+  if (query.activeOnly) {
+    filter.isActive = true;
   }
 
   const [items, total] = await Promise.all([

@@ -1,6 +1,6 @@
-# Aether Luxe by Azfar
+# Aether
 
-A clean, premium, minimal dark luxury catalog website built with Next.js, TypeScript, Tailwind CSS, MongoDB, Cloudinary, and NextAuth.
+A clean, premium, mobile-friendly dark luxury catalog website built with Next.js, TypeScript, Tailwind CSS, MongoDB, Cloudinary, NextAuth, and Stripe.
 
 This is a catalog, not a traditional ecommerce store. Customers browse products and place orders through the Google Form linked on every product detail page.
 
@@ -11,11 +11,15 @@ This is a catalog, not a traditional ecommerce store. Customers browse products 
 - Brand and category filters
 - Sorting by newest, price low to high, and price high to low
 - Pagination with 12 products per page
-- Product cards with image, name, brand, category, price, description, and details link
+- Mobile-first catalog inspired by a luxury club layout
+- Product cards with multi-image slider, brand, price, and add-to-cart
 - Product details page with multiple images and close-up images
-- Google Form ordering button
+- Working cart and checkout
+- QR payment with customer receipt upload
+- Stripe Checkout payment option
 - NextAuth credentials login for the owner
-- Admin dashboard for adding, editing, deleting, and uploading product images
+- Admin dashboard for products, brands, and orders
+- Admin can confirm or reject receipt/paid orders
 - MongoDB product schema
 - Cloudinary image uploads
 - Responsive luxury dark interface
@@ -44,6 +48,9 @@ ADMIN_PASSWORD_HASH=$2b$10$replace_with_a_bcrypt_hash
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
+NEXT_PUBLIC_QR_PAYMENT_IMAGE_URL=https://res.cloudinary.com/your-cloud/image/upload/your-payment-qr.png
+STRIPE_SECRET_KEY=sk_test_replace_me
 ```
 
 Generate a secure NextAuth secret:
@@ -71,9 +78,14 @@ The admin email and password are never hardcoded in source code. Authentication 
   description: string;
   productCode: string;
   images: string[];
+  isActive: boolean;
   createdAt: Date;
 }
 ```
+
+## Orders
+
+QR orders store the uploaded receipt URL and start as `pending_receipt`. Stripe orders create a Stripe Checkout Session and update to `paid` after the success page confirms the session. Admin can then set orders to `confirmed` or `rejected`.
 
 ## Local Development
 
@@ -152,10 +164,6 @@ public/
   swan.svg
 ```
 
-## Order Form
+## Uploads
 
-The product detail call to action opens:
-
-```text
-https://forms.gle/fT4yjSWAr6rvnaNh6
-```
+Product image uploads and receipt uploads use Cloudinary. If upload keeps loading, check that `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` are real values and not placeholders.

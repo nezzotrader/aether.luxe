@@ -1,7 +1,12 @@
+import Link from "next/link";
+import { Grid2X2, Package, Shirt, ShoppingBag, Watch } from "lucide-react";
 import { CatalogFilters } from "@/components/CatalogFilters";
+import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { Pagination } from "@/components/Pagination";
 import { ProductCard } from "@/components/ProductCard";
+import { CATEGORIES } from "@/lib/constants";
+import { getBrands } from "@/lib/brands";
 import { getProducts } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +14,8 @@ export const dynamic = "force-dynamic";
 type HomeProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const CATEGORY_ICONS = [Grid2X2, ShoppingBag, Shirt, Package, Watch];
 
 function readParam(
   params: Record<string, string | string[] | undefined>,
@@ -33,43 +40,89 @@ export default async function Home({ searchParams }: HomeProps) {
     }
   }
 
-  const { products, total, pages } = await getProducts({
-    search,
-    brand,
-    category,
-    sort,
-    page,
-  });
+  const [brands, productResult] = await Promise.all([
+    getBrands({ activeOnly: true }),
+    getProducts({
+      search,
+      brand,
+      category,
+      sort,
+      page,
+      activeOnly: true,
+    }),
+  ]);
+  const { products, total, pages } = productResult;
+  const heroProduct = products[0];
 
   return (
     <>
       <Header search={search} />
       <main>
-        <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-          <div className="grid gap-10 lg:grid-cols-[1fr_420px] lg:items-end">
-            <div>
-              <p className="text-xs uppercase tracking-[0.34em] text-white/45">
-                Modern luxury catalog
+        <section className="relative overflow-hidden border-b border-white/10 bg-[#0b0506]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(120,20,42,0.32),transparent_34%),linear-gradient(90deg,rgba(0,0,0,0.82),rgba(0,0,0,0.3))]" />
+          {heroProduct?.images[0] ? (
+            <div
+              className="absolute inset-y-0 right-0 hidden w-3/5 bg-cover bg-center opacity-55 md:block"
+              style={{ backgroundImage: `url(${heroProduct.images[0]})` }}
+            />
+          ) : null}
+          <div className="relative mx-auto grid min-h-[430px] max-w-7xl items-center px-4 py-16 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/55">
+                Luxury is in the details
               </p>
-              <h1 className="mt-5 max-w-4xl font-display text-5xl font-semibold leading-[0.96] text-white sm:text-7xl">
-                Pre-order now, arrive in 5-9 business days.
+              <h1 className="mt-5 font-display text-5xl font-semibold uppercase leading-[0.95] tracking-[0.12em] text-white sm:text-7xl">
+                Aether
               </h1>
+              <p className="mt-5 max-w-xl text-sm uppercase tracking-[0.22em] text-white/70 sm:text-base">
+                Curated catalog. Premium presentation. Smooth checkout.
+              </p>
+              <Link
+                href="#catalog"
+                className="mt-8 inline-flex h-12 items-center justify-center rounded-md bg-[#8b1d32] px-7 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#a42a42]"
+              >
+                Explore Collection
+              </Link>
             </div>
-            <p className="max-w-xl text-base leading-7 text-white/60 lg:justify-self-end">
-              Not Authentic but high quality. Highest quality replica products from the most reputable factories. We ensure that every piece in our collection meets our strict standards for craftsmanship and materials, so you can shop with confidence knowing you're getting the best of the best.
-            </p>
           </div>
-          <div className="silver-line mt-10 h-px w-full" />
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+        <section className="border-b border-white/10 bg-[#110809]">
+          <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-5 sm:px-6 lg:px-8">
+            <Link
+              href="/#catalog"
+              className="inline-flex h-12 min-w-32 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/75"
+            >
+              <Grid2X2 className="size-4" aria-hidden="true" />
+              All
+            </Link>
+            {CATEGORIES.map((item, index) => {
+              const Icon = CATEGORY_ICONS[index % CATEGORY_ICONS.length];
+              return (
+                <Link
+                  key={item}
+                  href={`/?category=${encodeURIComponent(item)}#catalog`}
+                  className="inline-flex h-12 min-w-32 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/75 transition hover:border-white/30 hover:text-white"
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                  {item}
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        <section
+          id="catalog"
+          className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8"
+        >
           <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-white/45">
-                Catalog
+                Premium selection
               </p>
               <h2 className="mt-2 font-display text-3xl font-semibold text-white">
-                Latest Arrivals
+                Latest Catalog
               </h2>
             </div>
             <p className="text-sm text-white/45">{total} products displayed</p>
@@ -80,10 +133,11 @@ export default async function Home({ searchParams }: HomeProps) {
             brand={brand}
             category={category}
             sort={sort}
+            brands={brands}
           />
 
           {products.length ? (
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {products.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
@@ -101,7 +155,50 @@ export default async function Home({ searchParams }: HomeProps) {
 
           <Pagination page={page} pages={pages} params={queryParams} />
         </section>
+
+        <section
+          id="brands"
+          className="border-y border-white/10 bg-[#0d0708] px-4 py-12 sm:px-6 lg:px-8"
+        >
+          <div className="mx-auto max-w-7xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-white/45">
+              Brands
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              {brands.map((item) => (
+                <Link
+                  key={item._id}
+                  href={`/?brand=${encodeURIComponent(item.name)}#catalog`}
+                  className="rounded-md border border-white/10 px-4 py-3 text-sm text-white/70 transition hover:border-white/35 hover:text-white"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="about"
+          className="mx-auto grid max-w-7xl gap-6 px-4 py-14 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8"
+        >
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/45">
+              About us
+            </p>
+            <h2 className="mt-3 font-display text-4xl font-semibold text-white">
+              Aether is built for clean browsing and confident ordering.
+            </h2>
+          </div>
+          <p className="text-base leading-8 text-white/62">
+            Browse multiple product images from the main catalog, add items to
+            cart, checkout by QR transfer with receipt attachment, or use Stripe
+            card payment. Admin can manage catalog items, brands, and order
+            confirmation from one private panel.
+          </p>
+        </section>
       </main>
+      <Footer />
     </>
   );
 }

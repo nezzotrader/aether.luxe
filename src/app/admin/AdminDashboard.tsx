@@ -1,56 +1,98 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { signOut } from "next-auth/react";
-import { LogOut, Pencil, Plus, Save, Trash2, X } from "lucide-react";
-import { BRANDS, CATEGORIES } from "@/lib/constants";
+import {
+  Boxes,
+  Building2,
+  ExternalLink,
+  LayoutDashboard,
+  LogOut,
+  Pencil,
+  Plus,
+  Save,
+  ShoppingBag,
+  Trash2,
+  X,
+} from "lucide-react";
+import { CATEGORIES } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
-import type { Product, ProductPayload } from "@/types/product";
-
-const emptyForm: ProductPayload = {
-  name: "",
-  brand: BRANDS[0],
-  category: CATEGORIES[0],
-  price: 0,
-  description: "",
-  productCode: "",
-  images: [],
-};
+import type { Brand, Order, Product, ProductPayload } from "@/types/product";
 
 type AdminDashboardProps = {
   initialProducts: Product[];
+  initialBrands: Brand[];
+  initialOrders: Order[];
 };
 
-export function AdminDashboard({ initialProducts }: AdminDashboardProps) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [form, setForm] = useState<ProductPayload>(emptyForm);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+function makeEmptyProduct(brand = ""): ProductPayload {
+  return {
+    name: "",
+    brand,
+    category: CATEGORIES[0],
+    price: 0,
+    description: "",
+    productCode: "",
+    images: [],
+    isActive: true,
+  };
+}
+
+export function AdminDashboard({
+  initialProducts,
+  initialBrands,
+  initialOrders,
+}: AdminDashboardProps) {
+  const [tab, setTab] = useState<"products" | "brands" | "orders">("products");
+  const [products, setProducts] = useState(initialProducts);
+  const [brands, setBrands] = useState(initialBrands);
+  const [orders, setOrders] = useState(initialOrders);
+  const [productForm, setProductForm] = useState<ProductPayload>(
+    makeEmptyProduct(initialBrands[0]?.name || ""),
+  );
+  const [brandForm, setBrandForm] = useState({ name: "", isActive: true });
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState("");
-  const formTitle = editingId ? "Edit product" : "Add product";
 
-  async function loadProducts() {
-    setLoading(true);
-    const response = await fetch("/api/products?sort=newest&limit=1000", {
-      cache: "no-store",
-    });
+  const activeProducts = useMemo(
+    () => products.filter((product) => product.isActive).length,
+    [products],
+  );
+
+  async function refreshProducts() {
+    const response = await fetch("/api/products?sort=newest&limit=1000");
     const data = await response.json();
     setProducts(data.products || []);
-    setLoading(false);
   }
 
-  const hasImages = useMemo(() => form.images.length > 0, [form.images]);
-
-  function resetForm() {
-    setEditingId(null);
-    setForm(emptyForm);
-    setMessage("");
+  async function refreshBrands() {
+    const response = await fetch("/api/brands");
+    const data = await response.json();
+    setBrands(data.brands || []);
   }
 
-  async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
+  async function refreshOrders() {
+    const response = await fetch("/api/orders");
+    const data = await response.json();
+    setOrders(data.orders || []);
+  }
+
+  function resetProductForm() {
+    setEditingProductId(null);
+    setProductForm(makeEmptyProduct(brands[0]?.name || ""));
+  }
+
+  function resetBrandForm() {
+    setEditingBrandId(null);
+    setBrandForm({ name: "", isActive: true });
+  }
+
+  async function handleProductUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const files = event.target.files;
 
     if (!files?.length) {
@@ -60,39 +102,41 @@ export function AdminDashboard({ initialProducts }: AdminDashboardProps) {
     setUploading(true);
     setMessage("");
     const uploadData = new FormData();
-
     Array.from(files).forEach((file) => uploadData.append("images", file));
 
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: uploadData,
-    });
-    const data = await response.json();
-    setUploading(false);
-    event.target.value = "";
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadData,
+      });
+      const data = await response.json();
 
-    if (!response.ok) {
-      setMessage(data.message || "Image upload failed.");
-      return;
+      if (!response.ok) {
+        setMessage(data.message || "Image upload failed.");
+        return;
+      }
+
+      setProductForm((current) => ({
+        ...current,
+        images: [...current.images, ...data.images],
+      }));
+      setMessage("Images uploaded.");
+    } finally {
+      setUploading(false);
+      event.target.value = "";
     }
-
-    setForm((current) => ({
-      ...current,
-      images: [...current.images, ...data.images],
-    }));
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function saveProduct(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
     setMessage("");
-
     const response = await fetch(
-      editingId ? `/api/products/${editingId}` : "/api/products",
+      editingProductId ? `/api/products/${editingProductId}` : "/api/products",
       {
-        method: editingId ? "PUT" : "POST",
+        method: editingProductId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(productForm),
       },
     );
     const data = await response.json();
@@ -103,15 +147,29 @@ export function AdminDashboard({ initialProducts }: AdminDashboardProps) {
       return;
     }
 
-    resetForm();
-    await loadProducts();
+    resetProductForm();
+    await refreshProducts();
     setMessage("Product saved.");
   }
 
-  async function handleDelete(id: string) {
-    const confirmed = window.confirm("Delete this product from the catalog?");
+  function editProduct(product: Product) {
+    setTab("products");
+    setEditingProductId(product._id);
+    setProductForm({
+      name: product.name,
+      brand: product.brand,
+      category: product.category,
+      price: product.price,
+      description: product.description,
+      productCode: product.productCode,
+      images: product.images,
+      isActive: product.isActive,
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
-    if (!confirmed) {
+  async function deleteProduct(id: string) {
+    if (!window.confirm("Delete this product?")) {
       return;
     }
 
@@ -123,287 +181,329 @@ export function AdminDashboard({ initialProducts }: AdminDashboardProps) {
       return;
     }
 
-    await loadProducts();
+    await refreshProducts();
   }
 
-  function editProduct(product: Product) {
-    setEditingId(product._id);
-    setForm({
-      name: product.name,
-      brand: product.brand,
-      category: product.category,
-      price: product.price,
-      description: product.description,
-      productCode: product.productCode,
-      images: product.images,
-    });
+  async function saveBrand(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
     setMessage("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const response = await fetch(
+      editingBrandId ? `/api/brands/${editingBrandId}` : "/api/brands",
+      {
+        method: editingBrandId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(brandForm),
+      },
+    );
+    const data = await response.json();
+    setSaving(false);
+
+    if (!response.ok) {
+      setMessage(data.message || "Brand could not be saved.");
+      return;
+    }
+
+    resetBrandForm();
+    await refreshBrands();
+    setMessage("Brand saved.");
+  }
+
+  async function deleteBrand(id: string) {
+    if (!window.confirm("Delete this brand? Existing product brand names stay unchanged.")) {
+      return;
+    }
+
+    const response = await fetch(`/api/brands/${id}`, { method: "DELETE" });
+
+    if (!response.ok) {
+      const data = await response.json();
+      setMessage(data.message || "Brand could not be deleted.");
+      return;
+    }
+
+    await refreshBrands();
+  }
+
+  async function updateOrder(id: string, paymentStatus: Order["paymentStatus"]) {
+    const response = await fetch(`/api/orders/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentStatus }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      setMessage(data.message || "Order could not be updated.");
+      return;
+    }
+
+    await refreshOrders();
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex flex-col justify-between gap-4 border-b border-white/10 pb-6 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-white/45">
-            Owner dashboard
+    <main className="grid min-h-[calc(100vh-150px)] border-t border-white/10 bg-[#080405] lg:grid-cols-[230px_minmax(0,1fr)]">
+      <aside className="border-b border-white/10 p-4 lg:border-b-0 lg:border-r">
+        <div className="hidden lg:block">
+          <p className="font-display text-2xl font-semibold uppercase tracking-[0.18em] text-white">
+            Aether
           </p>
-          <h1 className="mt-3 font-display text-5xl font-semibold text-white">
-            Catalog control
-          </h1>
+          <p className="text-xs uppercase tracking-[0.24em] text-white/45">
+            Admin Panel
+          </p>
         </div>
+        <nav className="mt-4 grid grid-cols-3 gap-2 lg:grid-cols-1">
+          {[
+            ["products", "Products", Boxes],
+            ["brands", "Brands", Building2],
+            ["orders", "Orders", ShoppingBag],
+          ].map(([value, label, Icon]) => {
+            const LucideIcon = Icon as typeof LayoutDashboard;
+            return (
+              <button
+                key={value as string}
+                type="button"
+                onClick={() => setTab(value as "products" | "brands" | "orders")}
+                className={`inline-flex h-11 items-center justify-center gap-2 rounded-md px-3 text-sm lg:justify-start ${
+                  tab === value
+                    ? "bg-[#8b1d32] text-white"
+                    : "border border-white/10 text-white/65"
+                }`}
+              >
+                <LucideIcon className="size-4" aria-hidden="true" />
+                {label as string}
+              </button>
+            );
+          })}
+        </nav>
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-white/10 px-4 text-sm font-medium text-white/75 transition hover:border-white/35 hover:text-white"
+          className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-white/10 text-sm text-white/65 transition hover:border-white/35 hover:text-white"
         >
           <LogOut className="size-4" aria-hidden="true" />
           Sign out
         </button>
-      </div>
+      </aside>
 
-      <section className="grid gap-8 py-8 lg:grid-cols-[420px_minmax(0,1fr)]">
-        <form
-          onSubmit={handleSubmit}
-          className="self-start rounded-lg border border-white/10 bg-[#101010] p-5"
-        >
-          <div className="mb-5 flex items-center justify-between gap-3">
-            <h2 className="font-display text-3xl font-semibold text-white">
-              {formTitle}
-            </h2>
-            {editingId ? (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="inline-flex size-9 items-center justify-center rounded-md border border-white/10 text-white/65 transition hover:border-white/35 hover:text-white"
-                aria-label="Cancel editing"
-              >
-                <X className="size-4" aria-hidden="true" />
-              </button>
-            ) : null}
+      <section className="p-4 sm:p-6 lg:p-8">
+        <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/45">
+              Dashboard
+            </p>
+            <h1 className="font-display text-4xl font-semibold text-white">
+              {tab === "products" ? "Products" : tab === "brands" ? "Brands" : "Orders"}
+            </h1>
           </div>
+          <Link
+            href="/"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-white/10 px-4 text-sm text-white/75 transition hover:border-white/35"
+          >
+            View Store
+            <ExternalLink className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
 
-          <div className="space-y-4">
-            <label className="block space-y-2">
-              <span className="text-xs uppercase tracking-[0.22em] text-white/45">
-                Images
-              </span>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleUpload}
-                className="w-full rounded-md border border-white/10 bg-[#151515] px-3 py-3 text-sm text-white file:mr-4 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-semibold file:text-black"
-              />
-              <span className="text-xs text-white/40">
-                {uploading
-                  ? "Uploading images..."
-                  : "Upload product and close-up detail images."}
-              </span>
-            </label>
+        {message ? (
+          <p className="mb-4 rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/70">
+            {message}
+          </p>
+        ) : null}
 
-            {hasImages ? (
-              <div className="grid grid-cols-4 gap-2">
-                {form.images.map((image) => (
-                  <div
-                    key={image}
-                    className="relative aspect-square overflow-hidden rounded-md bg-[#1a1a1a]"
-                  >
-                    <Image
-                      src={image}
-                      alt=""
-                      fill
-                      sizes="90px"
-                      className="object-cover"
-                    />
-                    <button
-                      type="button"
-                      aria-label="Remove image"
-                      onClick={() =>
-                        setForm((current) => ({
-                          ...current,
-                          images: current.images.filter((item) => item !== image),
-                        }))
-                      }
-                      className="absolute right-1 top-1 inline-flex size-7 items-center justify-center rounded-full bg-black/70 text-white"
-                    >
-                      <X className="size-3.5" aria-hidden="true" />
-                    </button>
+        {tab === "products" ? (
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+            <div className="rounded-lg border border-white/10 bg-[#100809]">
+              <div className="flex items-center justify-between border-b border-white/10 p-4">
+                <p className="text-sm text-white/60">
+                  {activeProducts} active / {products.length} total
+                </p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[760px] text-left text-sm">
+                  <thead className="text-xs uppercase tracking-[0.18em] text-white/40">
+                    <tr>
+                      <th className="p-4">Product</th>
+                      <th className="p-4">Brand</th>
+                      <th className="p-4">Category</th>
+                      <th className="p-4">Price</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products.map((product) => (
+                      <tr key={product._id} className="border-t border-white/10">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="relative size-16 overflow-hidden rounded-md bg-[#1b1011]">
+                              <Image src={product.images[0] || "/swan.svg"} alt={product.name} fill sizes="64px" className="object-cover" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-white">{product.name}</p>
+                              <p className="text-xs text-white/40">SKU: {product.productCode}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4 text-white/70">{product.brand}</td>
+                        <td className="p-4 text-white/70">{product.category}</td>
+                        <td className="p-4 text-white/70">{formatPrice(product.price)}</td>
+                        <td className="p-4">
+                          <span className={`rounded-full px-2 py-1 text-xs ${product.isActive ? "bg-green-500/15 text-green-200" : "bg-red-500/15 text-red-200"}`}>
+                            {product.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex gap-2">
+                            <button type="button" onClick={() => editProduct(product)} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70">
+                              <Pencil className="size-4" />
+                            </button>
+                            <button type="button" onClick={() => deleteProduct(product._id)} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70">
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <form onSubmit={saveProduct} className="rounded-lg border border-white/10 bg-[#100809] p-5">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="font-display text-3xl font-semibold text-white">
+                  {editingProductId ? "Edit Product" : "Add Product"}
+                </h2>
+                {editingProductId ? (
+                  <button type="button" onClick={resetProductForm} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/65">
+                    <X className="size-4" />
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="space-y-3">
+                <input value={productForm.name} onChange={(event) => setProductForm({ ...productForm, name: event.target.value })} required placeholder="Product name" className="h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white outline-none placeholder:text-white/35" />
+                <div className="grid grid-cols-2 gap-3">
+                  <select value={productForm.brand} onChange={(event) => setProductForm({ ...productForm, brand: event.target.value })} className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white">
+                    {brands.map((brand) => (
+                      <option key={brand._id} value={brand.name}>{brand.name}</option>
+                    ))}
+                  </select>
+                  <select value={productForm.category} onChange={(event) => setProductForm({ ...productForm, category: event.target.value })} className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white">
+                    {CATEGORIES.map((category) => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <input type="number" min="0" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: Number(event.target.value) })} required placeholder="Price" className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white" />
+                  <input value={productForm.productCode} onChange={(event) => setProductForm({ ...productForm, productCode: event.target.value })} required placeholder="SKU" className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white" />
+                </div>
+                <textarea value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} required rows={4} placeholder="Description" className="w-full rounded-md border border-white/10 bg-[#170d0f] px-3 py-3 text-sm text-white" />
+                <label className="flex items-center gap-2 text-sm text-white/70">
+                  <input type="checkbox" checked={productForm.isActive} onChange={(event) => setProductForm({ ...productForm, isActive: event.target.checked })} />
+                  Active on store
+                </label>
+                <input type="file" multiple accept="image/*" onChange={handleProductUpload} className="w-full rounded-md border border-white/10 bg-[#170d0f] p-3 text-sm text-white file:mr-4 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-semibold file:text-black" />
+                <p className="text-xs text-white/45">{uploading ? "Uploading..." : "Upload multiple catalog/detail images."}</p>
+                {productForm.images.length ? (
+                  <div className="grid grid-cols-4 gap-2">
+                    {productForm.images.map((image) => (
+                      <div key={image} className="relative aspect-square overflow-hidden rounded-md bg-[#1b1011]">
+                        <Image src={image} alt="" fill sizes="80px" className="object-cover" />
+                        <button type="button" onClick={() => setProductForm((current) => ({ ...current, images: current.images.filter((item) => item !== image) }))} className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-black/70 text-white">
+                          <X className="size-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+
+              <button type="submit" disabled={saving || uploading} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-[#8b1d32] text-sm font-semibold text-white disabled:opacity-55">
+                {editingProductId ? <Save className="size-4" /> : <Plus className="size-4" />}
+                {saving ? "Saving..." : "Save Product"}
+              </button>
+            </form>
+          </div>
+        ) : null}
+
+        {tab === "brands" ? (
+          <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+            <div className="rounded-lg border border-white/10 bg-[#100809] p-4">
+              <h2 className="font-display text-3xl text-white">Brands</h2>
+              <div className="mt-4 grid gap-2">
+                {brands.map((brand) => (
+                  <div key={brand._id} className="flex items-center justify-between rounded-md border border-white/10 p-3">
+                    <div>
+                      <p className="text-white">{brand.name}</p>
+                      <p className="text-xs text-white/45">{brand.isActive ? "Active" : "Inactive"}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => { setEditingBrandId(brand._id); setBrandForm({ name: brand.name, isActive: brand.isActive }); }} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70">
+                        <Pencil className="size-4" />
+                      </button>
+                      <button type="button" onClick={() => deleteBrand(brand._id)} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70">
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
+            </div>
+            <form onSubmit={saveBrand} className="rounded-lg border border-white/10 bg-[#100809] p-5">
+              <h2 className="font-display text-3xl text-white">{editingBrandId ? "Edit Brand" : "Add Brand"}</h2>
+              <input value={brandForm.name} onChange={(event) => setBrandForm({ ...brandForm, name: event.target.value })} required placeholder="Brand name" className="mt-4 h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white" />
+              <label className="mt-4 flex items-center gap-2 text-sm text-white/70">
+                <input type="checkbox" checked={brandForm.isActive} onChange={(event) => setBrandForm({ ...brandForm, isActive: event.target.checked })} />
+                Active on store
+              </label>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <button type="button" onClick={resetBrandForm} className="h-11 rounded-md border border-white/10 text-sm text-white/70">Cancel</button>
+                <button type="submit" disabled={saving} className="h-11 rounded-md bg-[#8b1d32] text-sm font-semibold text-white">Save Brand</button>
+              </div>
+            </form>
+          </div>
+        ) : null}
+
+        {tab === "orders" ? (
+          <div className="grid gap-4">
+            {orders.map((order) => (
+              <article key={order._id} className="rounded-lg border border-white/10 bg-[#100809] p-4">
+                <div className="flex flex-col justify-between gap-3 sm:flex-row">
+                  <div>
+                    <p className="font-semibold text-white">{order.customerName}</p>
+                    <p className="text-sm text-white/50">{order.customerEmail} / {order.customerPhone}</p>
+                    <p className="mt-1 text-sm text-white/50">{order.shippingAddress}</p>
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <p className="font-semibold text-white">{formatPrice(order.total)}</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-white/45">{order.paymentMethod} / {order.paymentStatus}</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-2">
+                  {order.items.map((item) => (
+                    <div key={`${order._id}-${item.productId}`} className="flex justify-between text-sm text-white/60">
+                      <span>{item.quantity} x {item.name}</span>
+                      <span>{formatPrice(item.price * item.quantity)}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {order.receiptUrl ? (
+                    <a href={order.receiptUrl} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center rounded-md border border-white/10 px-3 text-sm text-white/75">View receipt</a>
+                  ) : null}
+                  <button type="button" onClick={() => updateOrder(order._id, "confirmed")} className="h-10 rounded-md bg-green-700 px-3 text-sm font-semibold text-white">Confirm</button>
+                  <button type="button" onClick={() => updateOrder(order._id, "rejected")} className="h-10 rounded-md bg-red-800 px-3 text-sm font-semibold text-white">Reject</button>
+                </div>
+              </article>
+            ))}
+            {!orders.length ? (
+              <div className="rounded-lg border border-white/10 bg-[#100809] p-10 text-center text-white/55">No orders yet.</div>
             ) : null}
-
-            <label className="block space-y-2">
-              <span className="text-xs uppercase tracking-[0.22em] text-white/45">
-                Product name
-              </span>
-              <input
-                value={form.name}
-                onChange={(event) => setForm({ ...form, name: event.target.value })}
-                required
-                className="h-11 w-full rounded-md border border-white/10 bg-[#151515] px-3 text-sm text-white outline-none focus:border-white/35"
-              />
-            </label>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="block space-y-2">
-                <span className="text-xs uppercase tracking-[0.22em] text-white/45">
-                  Brand
-                </span>
-                <select
-                  value={form.brand}
-                  onChange={(event) => setForm({ ...form, brand: event.target.value })}
-                  className="h-11 w-full rounded-md border border-white/10 bg-[#151515] px-3 text-sm text-white outline-none focus:border-white/35"
-                >
-                  {BRANDS.map((brand) => (
-                    <option key={brand} value={brand}>
-                      {brand}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="block space-y-2">
-                <span className="text-xs uppercase tracking-[0.22em] text-white/45">
-                  Category
-                </span>
-                <select
-                  value={form.category}
-                  onChange={(event) =>
-                    setForm({ ...form, category: event.target.value })
-                  }
-                  className="h-11 w-full rounded-md border border-white/10 bg-[#151515] px-3 text-sm text-white outline-none focus:border-white/35"
-                >
-                  {CATEGORIES.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="block space-y-2">
-                <span className="text-xs uppercase tracking-[0.22em] text-white/45">
-                  Price
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  value={form.price}
-                  onChange={(event) =>
-                    setForm({ ...form, price: Number(event.target.value) })
-                  }
-                  required
-                  className="h-11 w-full rounded-md border border-white/10 bg-[#151515] px-3 text-sm text-white outline-none focus:border-white/35"
-                />
-              </label>
-              <label className="block space-y-2">
-                <span className="text-xs uppercase tracking-[0.22em] text-white/45">
-                  Product code
-                </span>
-                <input
-                  value={form.productCode}
-                  onChange={(event) =>
-                    setForm({ ...form, productCode: event.target.value })
-                  }
-                  required
-                  className="h-11 w-full rounded-md border border-white/10 bg-[#151515] px-3 text-sm text-white outline-none focus:border-white/35"
-                />
-              </label>
-            </div>
-
-            <label className="block space-y-2">
-              <span className="text-xs uppercase tracking-[0.22em] text-white/45">
-                Description
-              </span>
-              <textarea
-                value={form.description}
-                onChange={(event) =>
-                  setForm({ ...form, description: event.target.value })
-                }
-                required
-                rows={5}
-                className="w-full rounded-md border border-white/10 bg-[#151515] px-3 py-3 text-sm text-white outline-none focus:border-white/35"
-              />
-            </label>
           </div>
-
-          {message ? <p className="mt-4 text-sm text-white/65">{message}</p> : null}
-
-          <button
-            type="submit"
-            disabled={saving || uploading}
-            className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-semibold text-black transition hover:bg-[#d9d9d9] disabled:opacity-60"
-          >
-            {editingId ? <Save className="size-4" /> : <Plus className="size-4" />}
-            {saving ? "Saving..." : editingId ? "Save changes" : "Add product"}
-          </button>
-        </form>
-
-        <div>
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <h2 className="font-display text-3xl font-semibold text-white">
-              Products
-            </h2>
-            <p className="text-sm text-white/45">{products.length} visible</p>
-          </div>
-
-          {loading ? (
-            <div className="rounded-lg border border-white/10 bg-[#101010] p-8 text-sm text-white/55">
-              Loading products...
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {products.map((product) => (
-                <article
-                  key={product._id}
-                  className="grid gap-4 rounded-lg border border-white/10 bg-[#101010] p-4 sm:grid-cols-[96px_minmax(0,1fr)_auto] sm:items-center"
-                >
-                  <div className="relative aspect-square overflow-hidden rounded-md bg-[#1a1a1a]">
-                    <Image
-                      src={product.images[0] || "/swan.svg"}
-                      alt={product.name}
-                      fill
-                      sizes="96px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs uppercase tracking-[0.22em] text-white/40">
-                      {product.brand} / {product.category}
-                    </p>
-                    <h3 className="mt-1 font-display text-2xl font-semibold text-white">
-                      {product.name}
-                    </h3>
-                    <p className="mt-1 text-sm text-white/55">
-                      {product.productCode} / {formatPrice(product.price)}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => editProduct(product)}
-                      className="inline-flex size-10 items-center justify-center rounded-md border border-white/10 text-white/70 transition hover:border-white/35 hover:text-white"
-                      aria-label={`Edit ${product.name}`}
-                    >
-                      <Pencil className="size-4" aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(product._id)}
-                      className="inline-flex size-10 items-center justify-center rounded-md border border-white/10 text-white/70 transition hover:border-red-300/50 hover:text-red-200"
-                      aria-label={`Delete ${product.name}`}
-                    >
-                      <Trash2 className="size-4" aria-hidden="true" />
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
+        ) : null}
       </section>
     </main>
   );

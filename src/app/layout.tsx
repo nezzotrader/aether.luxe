@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import { CartProvider } from "@/components/CartProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -14,7 +15,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Aether Luxe by Azfar",
+  title: "Aether",
   description: "A private luxury catalog for curated designer pieces.",
 };
 
@@ -28,7 +29,9 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${cormorant.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#050505] text-white">{children}</body>
+      <body className="min-h-full bg-[#050505] text-white">
+        <CartProvider>{children}</CartProvider>
+      </body>
     </html>
   );
 }

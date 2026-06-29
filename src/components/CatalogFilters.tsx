@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { BRANDS, CATEGORIES, SORT_OPTIONS } from "@/lib/constants";
+import { CATEGORIES, SORT_OPTIONS } from "@/lib/constants";
+import type { Brand } from "@/types/product";
 
 type CatalogFiltersProps = {
   search?: string;
   brand?: string;
   category?: string;
   sort?: string;
+  brands: Brand[];
 };
 
 export function CatalogFilters({
@@ -13,6 +15,7 @@ export function CatalogFilters({
   brand = "",
   category = "",
   sort = "newest",
+  brands,
 }: CatalogFiltersProps) {
   return (
     <form
@@ -31,9 +34,9 @@ export function CatalogFilters({
           className="h-11 w-full rounded-md border border-white/10 bg-[#111111] px-3 text-sm text-white outline-none focus:border-white/35"
         >
           <option value="">All brands</option>
-          {BRANDS.map((item) => (
-            <option key={item} value={item}>
-              {item}
+          {brands.map((item) => (
+            <option key={item._id} value={item.name}>
+              {item.name}
             </option>
           ))}
         </select>

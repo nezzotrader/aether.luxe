@@ -31,6 +31,14 @@ async function uploadBuffer(buffer: Buffer, folder: string) {
   });
 }
 
+function hasPlaceholderCloudinaryConfig() {
+  return [
+    process.env.CLOUDINARY_CLOUD_NAME,
+    process.env.CLOUDINARY_API_KEY,
+    process.env.CLOUDINARY_API_SECRET,
+  ].some((value) => !value || value.startsWith("your_"));
+}
+
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
 
@@ -39,12 +47,10 @@ export async function POST(request: Request) {
   }
 
   if (
-    !process.env.CLOUDINARY_CLOUD_NAME ||
-    !process.env.CLOUDINARY_API_KEY ||
-    !process.env.CLOUDINARY_API_SECRET
+    hasPlaceholderCloudinaryConfig()
   ) {
     return NextResponse.json(
-      { message: "Cloudinary credentials are not configured." },
+      { message: "Cloudinary credentials are missing or still using placeholders." },
       { status: 500 },
     );
   }
@@ -61,13 +67,25 @@ export async function POST(request: Request) {
     );
   }
 
-  const uploads = await Promise.all(
-    files.map(async (file) => {
-      const arrayBuffer = await file.arrayBuffer();
-      const result = await uploadBuffer(Buffer.from(arrayBuffer), "aether-luxe");
-      return result.secure_url;
-    }),
-  );
+  try {
+    const uploads = await Promise.all(
+      files.map(async (file) => {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await uploadBuffer(Buffer.from(arrayBuffer), "aether-luxe");
+        return result.secure_url;
+      }),
+    );
 
-  return NextResponse.json({ images: uploads });
+    return NextResponse.json({ images: uploads });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Cloudinary upload failed. Check your Cloudinary API keys.",
+      },
+      { status: 500 },
+    );
+  }
 }

@@ -18,16 +18,16 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         const adminEmail = process.env.ADMIN_EMAIL;
-        const adminPassword = process.env.ADMIN_PASSWORD;
+        const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
 
-        if (!adminEmail || !adminPassword) {
-          throw new Error("Admin credentials salah.");
+        if (!adminEmail || !adminPasswordHash) {
+          throw new Error("Admin credentials are not configured.");
         }
 
         const email = credentials?.email?.trim().toLowerCase();
         const password = credentials?.password || "";
         const isEmailValid = email === adminEmail.trim().toLowerCase();
-        const isPasswordValid = password === adminPassword;
+        const isPasswordValid = await bcrypt.compare(password, adminPasswordHash);
 
         if (!isEmailValid || !isPasswordValid) {
           return null;
