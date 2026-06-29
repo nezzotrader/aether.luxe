@@ -45,8 +45,10 @@ function makeEmptyProduct(brand = ""): ProductPayload {
 }
 
 function splitOptions(value: string) {
+  const separator = value.includes(",") ? "," : /\s+/;
+
   return value
-    .split(",")
+    .split(separator)
     .map((item) => item.trim())
     .filter(Boolean);
 }
@@ -69,8 +71,8 @@ export function AdminDashboard({
   const [productForm, setProductForm] = useState<ProductPayload>(
     makeEmptyProduct(initialBrands[0]?.name || ""),
   );
-  const [productColorsInput, setProductColorsInput] = useState("");
-  const [productSizesInput, setProductSizesInput] = useState("");
+  const [productColorInput, setProductColorInput] = useState("");
+  const [productSizeInput, setProductSizeInput] = useState("");
   const [brandForm, setBrandForm] = useState({ name: "", isActive: true });
   const [promoForm, setPromoForm] = useState({
     code: "",
@@ -124,8 +126,8 @@ export function AdminDashboard({
   function resetProductForm() {
     setEditingProductId(null);
     setProductForm(makeEmptyProduct(brands[0]?.name || ""));
-    setProductColorsInput("");
-    setProductSizesInput("");
+    setProductColorInput("");
+    setProductSizeInput("");
   }
 
   function resetBrandForm() {
@@ -213,9 +215,37 @@ export function AdminDashboard({
       sizes: product.sizes || [],
       isActive: product.isActive,
     });
-    setProductColorsInput(joinOptions(product.colors));
-    setProductSizesInput(joinOptions(product.sizes));
+    setProductColorInput("");
+    setProductSizeInput("");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function addProductOption(field: "colors" | "sizes", value: string) {
+    const cleanedValues = splitOptions(value);
+
+    if (!cleanedValues.length) {
+      return;
+    }
+
+    setProductForm((current) => ({
+      ...current,
+      [field]: Array.from(
+        new Set([...(current[field] || []), ...cleanedValues]),
+      ),
+    }));
+
+    if (field === "colors") {
+      setProductColorInput("");
+    } else {
+      setProductSizeInput("");
+    }
+  }
+
+  function removeProductOption(field: "colors" | "sizes", value: string) {
+    setProductForm((current) => ({
+      ...current,
+      [field]: (current[field] || []).filter((item) => item !== value),
+    }));
   }
 
   async function deleteProduct(id: string) {
@@ -332,27 +362,29 @@ export function AdminDashboard({
     await refreshOrders();
     setMessage(
       paymentStatus === "confirmed"
-        ? "Order confirmed. Invoice is available for the customer."
+        ? data.email?.message ||
+            "Order confirmed. Invoice is available for the customer."
         : "Order rejected and deleted.",
     );
   }
 
-  function invoiceUrl(orderId: string) {
-    const origin = typeof window === "undefined" ? "" : window.location.origin;
-    return `${origin}/invoice/${orderId}`;
-  }
+  async function sendInvoiceEmail(orderId: string) {
+    setMessage("");
+    const response = await fetch(`/api/orders/${orderId}/email`, {
+      method: "POST",
+    });
+    const data = await response.json();
 
-  function invoiceMailto(order: Order) {
-    const url = invoiceUrl(order._id);
-    return `mailto:${order.customerEmail}?subject=${encodeURIComponent(
-      "Aether invoice",
-    )}&body=${encodeURIComponent(
-      `Hi ${order.customerName}, your Aether invoice is ready: ${url}`,
-    )}`;
+    if (!response.ok) {
+      setMessage(data.message || "Invoice email could not be sent.");
+      return;
+    }
+
+    setMessage(data.message || "Invoice email sent to customer.");
   }
 
   return (
-    <main className="grid min-h-[calc(100vh-150px)] border-t border-white/10 bg-[#080405] lg:grid-cols-[230px_minmax(0,1fr)]">
+    <main className="grid min-h-[calc(100vh-150px)] border-t border-white/10 bg-[#070102] lg:grid-cols-[230px_minmax(0,1fr)]">
       <aside className="border-b border-white/10 p-4 lg:border-b-0 lg:border-r">
         <div className="hidden lg:block">
           <p className="font-display text-2xl font-semibold uppercase tracking-[0.18em] text-white">
@@ -377,7 +409,7 @@ export function AdminDashboard({
                 onClick={() => setTab(value as "products" | "brands" | "promos" | "orders")}
                 className={`inline-flex h-11 items-center justify-center gap-2 rounded-md px-3 text-sm lg:justify-start ${
                   tab === value
-                    ? "bg-[#8b1d32] text-white"
+                    ? "bg-[#7f1730] text-white"
                     : "border border-white/10 text-white/65"
                 }`}
               >
@@ -435,7 +467,7 @@ export function AdminDashboard({
 
         {tab === "products" ? (
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-            <div className="rounded-lg border border-white/10 bg-[#100809]">
+            <div className="rounded-lg border border-white/10 bg-[#120407]">
               <div className="flex items-center justify-between border-b border-white/10 p-4">
                 <p className="text-sm text-white/60">
                   {activeProducts} active / {products.length} total
@@ -466,7 +498,7 @@ export function AdminDashboard({
                               <p className="text-xs text-white/40">SKU: {product.productCode}</p>
                               {product.colors?.length || product.sizes?.length ? (
                                 <p className="mt-1 text-xs text-white/35">
-                                  {[product.colors?.length ? `Colours: ${joinOptions(product.colors)}` : "", product.sizes?.length ? `Sizes: ${joinOptions(product.sizes)}` : ""]
+                                  {[product.colors?.length ? `Colour / Design: ${joinOptions(product.colors)}` : "", product.sizes?.length ? `Sizes: ${joinOptions(product.sizes)}` : ""]
                                     .filter(Boolean)
                                     .join(" / ")}
                                 </p>
@@ -499,7 +531,7 @@ export function AdminDashboard({
               </div>
             </div>
 
-            <form onSubmit={saveProduct} className="rounded-lg border border-white/10 bg-[#100809] p-5">
+            <form onSubmit={saveProduct} className="rounded-lg border border-white/10 bg-[#120407] p-5">
               <div className="mb-5 flex items-center justify-between">
                 <h2 className="font-display text-3xl font-semibold text-white">
                   {editingProductId ? "Edit Product" : "Add Product"}
@@ -512,55 +544,101 @@ export function AdminDashboard({
               </div>
 
               <div className="space-y-3">
-                <input value={productForm.name} onChange={(event) => setProductForm({ ...productForm, name: event.target.value })} required placeholder="Product name" className="h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white outline-none placeholder:text-white/35" />
+                <input value={productForm.name} onChange={(event) => setProductForm({ ...productForm, name: event.target.value })} required placeholder="Product name" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35" />
                 <div className="grid grid-cols-2 gap-3">
-                  <select value={productForm.brand} onChange={(event) => setProductForm({ ...productForm, brand: event.target.value })} className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white">
+                  <select value={productForm.brand} onChange={(event) => setProductForm({ ...productForm, brand: event.target.value })} className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white">
                     {brands.map((brand) => (
                       <option key={brand._id} value={brand.name}>{brand.name}</option>
                     ))}
                   </select>
-                  <select value={productForm.category} onChange={(event) => setProductForm({ ...productForm, category: event.target.value })} className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white">
+                  <select value={productForm.category} onChange={(event) => setProductForm({ ...productForm, category: event.target.value })} className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white">
                     {CATEGORIES.map((category) => (
                       <option key={category} value={category}>{category}</option>
                     ))}
                   </select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <input type="number" min="0" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: Number(event.target.value) })} required placeholder="Price" className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white" />
-                  <input value={productForm.productCode} onChange={(event) => setProductForm({ ...productForm, productCode: event.target.value })} required placeholder="SKU" className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white" />
+                  <input type="number" min="0" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: Number(event.target.value) })} required placeholder="Price" className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white" />
+                  <input value={productForm.productCode} onChange={(event) => setProductForm({ ...productForm, productCode: event.target.value })} required placeholder="SKU" className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white" />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    value={productColorsInput}
-                    onChange={(event) => {
-                      setProductColorsInput(event.target.value);
-                      setProductForm({
-                        ...productForm,
-                        colors: splitOptions(event.target.value),
-                      });
-                    }}
-                    placeholder="Colours e.g. Black, White"
-                    className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white placeholder:text-white/35"
-                  />
-                  <input
-                    value={productSizesInput}
-                    onChange={(event) => {
-                      setProductSizesInput(event.target.value);
-                      setProductForm({
-                        ...productForm,
-                        sizes: splitOptions(event.target.value),
-                      });
-                    }}
-                    placeholder="Sizes e.g. S, M, 42"
-                    className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white placeholder:text-white/35"
-                  />
+                <div className="rounded-md border border-white/10 bg-black/20 p-3">
+                  <div className="mb-3 flex items-center justify-between">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
+                      Variations
+                    </p>
+                    <span className="text-xs text-white/35">Optional</span>
+                  </div>
+                  <div className="grid gap-3">
+                    <div className="grid grid-cols-[1fr_auto] gap-2">
+                      <input
+                        value={productColorInput}
+                        onChange={(event) => setProductColorInput(event.target.value)}
+                        placeholder="Colour / design e.g. Black White Green"
+                        className="h-10 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white placeholder:text-white/35"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => addProductOption("colors", productColorInput)}
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-xs font-semibold text-white/75 transition hover:border-white/35"
+                      >
+                        <Plus className="size-4" aria-hidden="true" />
+                        Add
+                      </button>
+                    </div>
+                    {productForm.colors?.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {productForm.colors.map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => removeProductOption("colors", item)}
+                            className="inline-flex h-8 items-center gap-2 rounded-full bg-[#7f1730]/50 px-3 text-xs text-white"
+                          >
+                            {item}
+                            <X className="size-3" aria-hidden="true" />
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                    <div className="grid grid-cols-[1fr_auto] gap-2">
+                      <input
+                        value={productSizeInput}
+                        onChange={(event) => setProductSizeInput(event.target.value)}
+                        placeholder="Size e.g. S, M, L, XL or 42"
+                        className="h-10 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white placeholder:text-white/35"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => addProductOption("sizes", productSizeInput)}
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-xs font-semibold text-white/75 transition hover:border-white/35"
+                      >
+                        <Plus className="size-4" aria-hidden="true" />
+                        Add
+                      </button>
+                    </div>
+                    {productForm.sizes?.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {productForm.sizes.map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => removeProductOption("sizes", item)}
+                            className="inline-flex h-8 items-center gap-2 rounded-full bg-white/10 px-3 text-xs text-white"
+                          >
+                            {item}
+                            <X className="size-3" aria-hidden="true" />
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-                <textarea value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} required rows={4} placeholder="Description" className="w-full rounded-md border border-white/10 bg-[#170d0f] px-3 py-3 text-sm text-white" />
+                <textarea value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} required rows={4} placeholder="Description" className="w-full rounded-md border border-white/10 bg-[#1a060b] px-3 py-3 text-sm text-white" />
                 <label className="flex items-center gap-2 text-sm text-white/70">
                   <input type="checkbox" checked={productForm.isActive} onChange={(event) => setProductForm({ ...productForm, isActive: event.target.checked })} />
                   Active on store
                 </label>
-                <input type="file" multiple accept="image/*" onChange={handleProductUpload} className="w-full rounded-md border border-white/10 bg-[#170d0f] p-3 text-sm text-white file:mr-4 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-semibold file:text-black" />
+                <input type="file" multiple accept="image/*" onChange={handleProductUpload} className="w-full rounded-md border border-white/10 bg-[#1a060b] p-3 text-sm text-white file:mr-4 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-semibold file:text-black" />
                 <p className="text-xs text-white/45">{uploading ? "Uploading..." : "Upload multiple catalog/detail images."}</p>
                 {productForm.images.length ? (
                   <div className="grid grid-cols-4 gap-2">
@@ -576,7 +654,7 @@ export function AdminDashboard({
                 ) : null}
               </div>
 
-              <button type="submit" disabled={saving || uploading} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-[#8b1d32] text-sm font-semibold text-white disabled:opacity-55">
+              <button type="submit" disabled={saving || uploading} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-[#7f1730] text-sm font-semibold text-white disabled:opacity-55">
                 {editingProductId ? <Save className="size-4" /> : <Plus className="size-4" />}
                 {saving ? "Saving..." : "Save Product"}
               </button>
@@ -586,7 +664,7 @@ export function AdminDashboard({
 
         {tab === "brands" ? (
           <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
-            <div className="rounded-lg border border-white/10 bg-[#100809] p-4">
+            <div className="rounded-lg border border-white/10 bg-[#120407] p-4">
               <h2 className="font-display text-3xl text-white">Brands</h2>
               <div className="mt-4 grid gap-2">
                 {brands.map((brand) => (
@@ -607,16 +685,16 @@ export function AdminDashboard({
                 ))}
               </div>
             </div>
-            <form onSubmit={saveBrand} className="rounded-lg border border-white/10 bg-[#100809] p-5">
+            <form onSubmit={saveBrand} className="rounded-lg border border-white/10 bg-[#120407] p-5">
               <h2 className="font-display text-3xl text-white">{editingBrandId ? "Edit Brand" : "Add Brand"}</h2>
-              <input value={brandForm.name} onChange={(event) => setBrandForm({ ...brandForm, name: event.target.value })} required placeholder="Brand name" className="mt-4 h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white" />
+              <input value={brandForm.name} onChange={(event) => setBrandForm({ ...brandForm, name: event.target.value })} required placeholder="Brand name" className="mt-4 h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white" />
               <label className="mt-4 flex items-center gap-2 text-sm text-white/70">
                 <input type="checkbox" checked={brandForm.isActive} onChange={(event) => setBrandForm({ ...brandForm, isActive: event.target.checked })} />
                 Active on store
               </label>
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <button type="button" onClick={resetBrandForm} className="h-11 rounded-md border border-white/10 text-sm text-white/70">Cancel</button>
-                <button type="submit" disabled={saving} className="h-11 rounded-md bg-[#8b1d32] text-sm font-semibold text-white">Save Brand</button>
+                <button type="submit" disabled={saving} className="h-11 rounded-md bg-[#7f1730] text-sm font-semibold text-white">Save Brand</button>
               </div>
             </form>
           </div>
@@ -624,7 +702,7 @@ export function AdminDashboard({
 
         {tab === "promos" ? (
           <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
-            <div className="rounded-lg border border-white/10 bg-[#100809] p-4">
+            <div className="rounded-lg border border-white/10 bg-[#120407] p-4">
               <h2 className="font-display text-3xl text-white">Promo Codes</h2>
               <div className="mt-4 grid gap-2">
                 {promos.map((promo) => (
@@ -676,7 +754,7 @@ export function AdminDashboard({
             </div>
             <form
               onSubmit={savePromo}
-              className="rounded-lg border border-white/10 bg-[#100809] p-5"
+              className="rounded-lg border border-white/10 bg-[#120407] p-5"
             >
               <h2 className="font-display text-3xl text-white">
                 {editingPromoId ? "Edit Promo" : "Add Promo"}
@@ -688,7 +766,7 @@ export function AdminDashboard({
                 }
                 required
                 placeholder="Code e.g. AETHER10"
-                className="mt-4 h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm uppercase text-white"
+                className="mt-4 h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm uppercase text-white"
               />
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <select
@@ -699,7 +777,7 @@ export function AdminDashboard({
                       type: event.target.value as "fixed" | "percent",
                     })
                   }
-                  className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white"
+                  className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white"
                 >
                   <option value="fixed">Fixed RM</option>
                   <option value="percent">Percent %</option>
@@ -711,7 +789,7 @@ export function AdminDashboard({
                   onChange={(event) =>
                     setPromoForm({ ...promoForm, value: Number(event.target.value) })
                   }
-                  className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white"
+                  className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white"
                 />
               </div>
               <label className="mt-4 flex items-center gap-2 text-sm text-white/70">
@@ -735,7 +813,7 @@ export function AdminDashboard({
                 <button
                   type="submit"
                   disabled={saving}
-                  className="h-11 rounded-md bg-[#8b1d32] text-sm font-semibold text-white"
+                  className="h-11 rounded-md bg-[#7f1730] text-sm font-semibold text-white"
                 >
                   Save Promo
                 </button>
@@ -747,7 +825,7 @@ export function AdminDashboard({
         {tab === "orders" ? (
           <div className="grid gap-4">
             {orders.map((order) => (
-              <article key={order._id} className="rounded-lg border border-white/10 bg-[#100809] p-4">
+              <article key={order._id} className="rounded-lg border border-white/10 bg-[#120407] p-4">
                 <div className="flex flex-col justify-between gap-3 sm:flex-row">
                   <div>
                     <p className="font-semibold text-white">{order.customerName}</p>
@@ -769,7 +847,7 @@ export function AdminDashboard({
                         {item.quantity} x {item.name}
                         {item.color || item.size ? (
                           <span className="block text-xs text-white/40">
-                            {[item.color ? `Colour: ${item.color}` : "", item.size ? `Size: ${item.size}` : ""]
+                            {[item.color ? `Colour / Design: ${item.color}` : "", item.size ? `Size: ${item.size}` : ""]
                               .filter(Boolean)
                               .join(" / ")}
                           </span>
@@ -798,14 +876,14 @@ export function AdminDashboard({
                   {order.paymentStatus === "confirmed" ? (
                     <>
                       <a href={`/invoice/${order._id}`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center rounded-md border border-white/10 px-3 text-sm text-white/75">Invoice</a>
-                      <a href={invoiceMailto(order)} className="inline-flex h-10 items-center rounded-md border border-white/10 px-3 text-sm text-white/75">Email invoice</a>
+                      <button type="button" onClick={() => sendInvoiceEmail(order._id)} className="inline-flex h-10 items-center rounded-md border border-white/10 px-3 text-sm text-white/75">Send invoice</button>
                     </>
                   ) : null}
                 </div>
               </article>
             ))}
             {!orders.length ? (
-              <div className="rounded-lg border border-white/10 bg-[#100809] p-10 text-center text-white/55">No orders yet.</div>
+              <div className="rounded-lg border border-white/10 bg-[#120407] p-10 text-center text-white/55">No orders yet.</div>
             ) : null}
           </div>
         ) : null}

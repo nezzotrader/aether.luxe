@@ -6,23 +6,7 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.1.2:3000
 - Environments: .env.local
-✓ Ready in 1449ms
+✓ Ready in 647ms
 
- GET /about 200 in 2.8s (next.js: 452ms, application-code: 2.4s)
- GET / 200 in 5.0s (next.js: 773ms, application-code: 4.2s)
- GET /about 200 in 93ms (next.js: 13ms, application-code: 80ms)
- GET /api/auth/csrf 200 in 1770ms (next.js: 1706ms, application-code: 64ms)
- POST /api/auth/callback/credentials?json=true 200 in 64ms (next.js: 26ms, application-code: 38ms)
-✓ Compiled in 867ms
- GET /about 200 in 881ms (next.js: 173ms, application-code: 708ms)
- GET /about 200 in 594ms (next.js: 14ms, application-code: 581ms)
- GET /about 200 in 632ms (next.js: 14ms, application-code: 618ms)
- GET /about 200 in 651ms (next.js: 111ms, application-code: 540ms)
- GET /about 200 in 653ms (next.js: 213ms, application-code: 440ms)
- GET /about 200 in 338ms (next.js: 13ms, application-code: 325ms)
- GET /about 200 in 400ms (next.js: 14ms, application-code: 386ms)
- GET /about 200 in 331ms (next.js: 12ms, application-code: 319ms)
- GET /about 200 in 209ms (next.js: 12ms, application-code: 197ms)
- GET /about 200 in 210ms (next.js: 95ms, application-code: 115ms)
- GET /api/auth/csrf 200 in 123ms (next.js: 98ms, application-code: 25ms)
- POST /api/auth/callback/credentials?json=true 200 in 43ms (next.js: 8ms, application-code: 34ms)
+ GET /admin 200 in 2.9s (next.js: 207ms, application-code: 2.7s)
+ GET /api/auth/session 200 in 3.7s (next.js: 3.6s, application-code: 60ms)

@@ -43,6 +43,7 @@ NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=replace-with-a-long-random-secret
 
 ADMIN_EMAIL=owner@example.com
+ADMIN_PASSWORD=local_plain_password
 ADMIN_PASSWORD_HASH=$2b$10$replace_with_a_bcrypt_hash
 
 CLOUDINARY_CLOUD_NAME=your_cloud_name
@@ -51,6 +52,11 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 NEXT_PUBLIC_QR_PAYMENT_IMAGE_URL=https://res.cloudinary.com/your-cloud/image/upload/your-payment-qr.png
 STRIPE_SECRET_KEY=sk_test_replace_me
+
+EMAILJS_SERVICE_ID=service_xxxxx
+EMAILJS_TEMPLATE_ID=template_xxxxx
+EMAILJS_PUBLIC_KEY=public_key_xxxxx
+EMAILJS_PRIVATE_KEY=optional_private_key_xxxxx
 ```
 
 Generate a secure NextAuth secret:
@@ -65,7 +71,9 @@ Generate the admin password hash:
 node -e "const bcrypt=require('bcryptjs'); bcrypt.hash('your-password-here', 10).then(console.log)"
 ```
 
-The admin email and password are never hardcoded in source code. Authentication reads `ADMIN_EMAIL` and `ADMIN_PASSWORD_HASH` from the environment.
+The admin email and password are never hardcoded in source code. Authentication reads `ADMIN_EMAIL` plus either `ADMIN_PASSWORD` or `ADMIN_PASSWORD_HASH` from the environment. Use `ADMIN_PASSWORD` only for local convenience; keep `ADMIN_PASSWORD_HASH` for production.
+
+EmailJS invoices use these template variables: `to_email`, `to_name`, `invoice_url`, `invoice_number`, `order_total`, `order_subtotal`, `shipping_fee`, `shipping_country`, `discount`, `promo_code`, `order_items`, and `shipping_address`.
 
 ## Product Schema
 
@@ -78,6 +86,8 @@ The admin email and password are never hardcoded in source code. Authentication 
   description: string;
   productCode: string;
   images: string[];
+  colors: string[];
+  sizes: string[];
   isActive: boolean;
   createdAt: Date;
 }

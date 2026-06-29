@@ -29,12 +29,12 @@ export function AddToCartButton({ product, compact = false }: AddToCartButtonPro
           {product.colors?.length ? (
             <label className="block space-y-2">
               <span className="text-xs uppercase tracking-[0.22em] text-white/45">
-                Colour
+                Colour / Design
               </span>
               <select
                 value={color}
                 onChange={(event) => setColor(event.target.value)}
-                className="h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white outline-none focus:border-white/35"
+                className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none focus:border-white/35"
               >
                 {product.colors.map((item) => (
                   <option key={item} value={item}>
@@ -52,7 +52,7 @@ export function AddToCartButton({ product, compact = false }: AddToCartButtonPro
               <select
                 value={size}
                 onChange={(event) => setSize(event.target.value)}
-                className="h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white outline-none focus:border-white/35"
+                className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none focus:border-white/35"
               >
                 {product.sizes.map((item) => (
                   <option key={item} value={item}>

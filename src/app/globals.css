@@ -1,10 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
+  --background: #070102;
   --foreground: #f7f7f7;
-  --charcoal: #141414;
-  --silver: #c8c8c8;
+  --charcoal: #120609;
+  --maroon: #7f1730;
+  --maroon-dark: #25070e;
+  --silver: #d1d1d1;
 }
 
 @theme inline {
@@ -21,8 +23,8 @@ body {
 }
 
 ::selection {
-  background: #f7f7f7;
-  color: #050505;
+  background: #7f1730;
+  color: #ffffff;
 }
 
 input,

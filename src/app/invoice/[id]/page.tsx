@@ -22,7 +22,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
     <>
       <Header />
       <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-        <section className="rounded-lg border border-white/10 bg-[#100809] p-6">
+        <section className="rounded-lg border border-white/10 bg-[#120407] p-6">
           <div className="flex flex-col justify-between gap-4 border-b border-white/10 pb-6 sm:flex-row">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-white/45">
@@ -49,7 +49,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
                   {item.quantity} x {item.name}
                   {item.color || item.size ? (
                     <span className="block text-xs text-white/40">
-                      {[item.color ? `Colour: ${item.color}` : "", item.size ? `Size: ${item.size}` : ""]
+                      {[item.color ? `Colour / Design: ${item.color}` : "", item.size ? `Size: ${item.size}` : ""]
                         .filter(Boolean)
                         .join(" / ")}
                     </span>

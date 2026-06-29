@@ -29,7 +29,7 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${cormorant.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#050505] text-white">
+      <body className="min-h-full bg-[#070102] text-white">
         <CartProvider>{children}</CartProvider>
       </body>
     </html>

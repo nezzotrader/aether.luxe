@@ -26,7 +26,7 @@ export default async function AdminPage() {
 
   return (
     <>
-      <Header />
+      <Header showSearch={false} />
       <AdminDashboard
         initialProducts={products}
         initialBrands={brands}

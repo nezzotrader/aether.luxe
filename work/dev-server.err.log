@@ -1,0 +1,270 @@
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <ScrollAndMaybeFocusHandler cacheNode={{rsc:{...}, ...}}>
+      <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+        <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+          <LoadingBoundary name="admin/" loading={null}>
+            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <InnerLayoutRouter url="/admin" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                    <SegmentViewNode type="page" pagePath="admin/page...">
+                      <SegmentTrieNode>
+                      <AdminPage>
+                        <header>
+                        <AdminDashboard initialProducts={[...]} initialBrands={[...]} initialOrders={[...]} ...>
+                          <main className="grid min-h...">
+                            <aside className="border-b b...">
+                              <div>
+                              <nav className="mt-4 grid ...">
+                                <button
+                                  type="button"
+                                  onClick={function onClick}
+                                  className="inline-flex h-11 items-center justify-center gap-2 rounded-md px-3 text-s..."
+-                                 fdprocessedid="5adgg8"
+                                >
+                                <button
+                                  type="button"
+                                  onClick={function onClick}
+                                  className="inline-flex h-11 items-center justify-center gap-2 rounded-md px-3 text-s..."
+-                                 fdprocessedid="jahu5"
+                                >
+                                <button
+                                  type="button"
+                                  onClick={function onClick}
+                                  className="inline-flex h-11 items-center justify-center gap-2 rounded-md px-3 text-s..."
+-                                 fdprocessedid="pfau4"
+                                >
+                                <button
+                                  type="button"
+                                  onClick={function onClick}
+                                  className="inline-flex h-11 items-center justify-center gap-2 rounded-md px-3 text-s..."
+-                                 fdprocessedid="5ayuuo"
+                                >
+                              <button
+                                type="button"
+                                onClick={function onClick}
+                                className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md b..."
+-                               fdprocessedid="8g7ckn"
+                              >
+                            <section className="p-4 sm:p-6...">
+                              <div>
+                              <div className="grid gap-6...">
+                                ...
+                                  <tbody>
+                                    <tr className="border-t b...">
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td className="p-4">
+                                        <div className="flex gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="g8l6d9"
+                                          >
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="ht6kxe"
+                                          >
+                                    <tr className="border-t b...">
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td className="p-4">
+                                        <div className="flex gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="s4pqhk"
+                                          >
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="chi1h"
+                                          >
+                                    <tr className="border-t b...">
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td className="p-4">
+                                        <div className="flex gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="6jdexk"
+                                          >
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="6k9yxd"
+                                          >
+                                    <tr className="border-t b...">
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td className="p-4">
+                                        <div className="flex gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="rgq2gk"
+                                          >
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="g8djk"
+                                          >
+                                    <tr className="border-t b...">
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td className="p-4">
+                                        <div className="flex gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="uptrw6"
+                                          >
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="554zeg"
+                                          >
+                                    <tr className="border-t b...">
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td>
+                                      <td className="p-4">
+                                        <div className="flex gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="6pevw"
+                                          >
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="grid size-9 place-items-center rounded-md border border-white/1..."
+-                                           fdprocessedid="8uyuli"
+                                          >
+                                <form onSubmit={function saveProduct} className="rounded-lg...">
+                                  <div>
+                                  <div className="space-y-3">
+                                    <input
+                                      value=""
+                                      onChange={function onChange}
+                                      required={true}
+                                      placeholder="Product name"
+                                      className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-..."
+-                                     fdprocessedid="qqrjr"
+                                    >
+                                    <div className="grid grid-...">
+                                      <select
+                                        value="Chanel"
+                                        onChange={function onChange}
+                                        className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm te..."
+-                                       fdprocessedid="o42v0n"
+                                      >
+                                      <select
+                                        value="Bags"
+                                        onChange={function onChange}
+                                        className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm te..."
+-                                       fdprocessedid="u3t8ni"
+                                      >
+                                    <div className="grid grid-...">
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={0}
+                                        onChange={function onChange}
+                                        required={true}
+                                        placeholder="Price"
+                                        className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm te..."
+-                                       fdprocessedid="3sgu0n"
+                                      >
+                                      <input
+                                        value=""
+                                        onChange={function onChange}
+                                        required={true}
+                                        placeholder="SKU"
+                                        className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm te..."
+-                                       fdprocessedid="qnd2jd"
+                                      >
+                                    <div className="rounded-md...">
+                                      <div>
+                                      <div className="grid gap-3">
+                                        <div className="grid grid-...">
+                                          <input
+                                            value=""
+                                            onChange={function onChange}
+                                            placeholder="Colour / design e.g. Black White Green"
+                                            className="h-10 rounded-md border border-white/10 bg-[#1a060b] px-3 text-s..."
+-                                           fdprocessedid="wf8v1g"
+                                          >
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="inline-flex h-10 items-center justify-center gap-2 rounded-md b..."
+-                                           fdprocessedid="3wokui"
+                                          >
+                                        <div className="grid grid-...">
+                                          <input
+                                            value=""
+                                            onChange={function onChange}
+                                            placeholder="Size e.g. S, M, L, XL or 42"
+                                            className="h-10 rounded-md border border-white/10 bg-[#1a060b] px-3 text-s..."
+-                                           fdprocessedid="ufikkv"
+                                          >
+                                          <button
+                                            type="button"
+                                            onClick={function onClick}
+                                            className="inline-flex h-10 items-center justify-center gap-2 rounded-md b..."
+-                                           fdprocessedid="x7fcbs"
+                                          >
+                                    ...
+                                  <button
+                                    type="submit"
+                                    disabled={false}
+                                    className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-..."
+-                                   fdprocessedid="t1fon34"
+                                  >
+                    ...
+                  ...
+        ...
+ 

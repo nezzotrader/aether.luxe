@@ -57,26 +57,21 @@ export default async function Home({ searchParams }: HomeProps) {
     <>
       <Header search={search} />
       <main>
-        <section className="relative overflow-hidden border-b border-white/10 bg-[#0b0506]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(120,20,42,0.32),transparent_34%),linear-gradient(90deg,rgba(0,0,0,0.82),rgba(0,0,0,0.3))]" />
-          <div
-            className="absolute inset-y-0 right-0 hidden w-3/5 bg-cover bg-center opacity-55 md:block"
-            style={{ backgroundImage: "url('/featured-lv-bag.jpg')" }}
-          />
-          <div className="relative mx-auto grid min-h-[430px] max-w-7xl items-center px-4 py-16 sm:px-6 lg:px-8">
-            <div className="max-w-2xl">
+        <section className="border-b border-white/10 bg-[linear-gradient(135deg,#070102_0%,#120407_48%,#3a0815_100%)]">
+          <div className="mx-auto grid min-h-[300px] max-w-7xl items-center px-4 py-12 sm:min-h-[340px] sm:px-6 lg:px-8">
+            <div className="max-w-xl">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/55">
                 Luxury is in the details
               </p>
-              <h1 className="mt-5 font-display text-5xl font-semibold uppercase leading-[0.95] tracking-[0.12em] text-white sm:text-7xl">
+              <h1 className="mt-4 font-display text-4xl font-semibold uppercase leading-none tracking-[0.1em] text-white sm:text-6xl">
                 Aether
               </h1>
-              <p className="mt-5 max-w-xl text-sm uppercase tracking-[0.22em] text-white/70 sm:text-base">
+              <p className="mt-4 max-w-lg text-xs uppercase leading-6 tracking-[0.2em] text-white/70 sm:text-sm">
                 Curated catalog. Premium presentation. Smooth checkout.
               </p>
               <Link
                 href="#catalog"
-                className="mt-8 inline-flex h-12 items-center justify-center rounded-md bg-[#8b1d32] px-7 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#a42a42]"
+                className="mt-7 inline-flex h-11 items-center justify-center rounded-md bg-[#7f1730] px-6 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#9a1d3a]"
               >
                 Explore Collection
               </Link>
@@ -84,7 +79,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </section>
 
-        <section className="border-b border-white/10 bg-[#110809]">
+        <section className="border-b border-white/10 bg-[#120407]">
           <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-5 sm:px-6 lg:px-8">
             <Link
               href="/#catalog"
@@ -160,7 +155,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
         <section
           id="brands"
-          className="border-y border-white/10 bg-[#0d0708] px-4 py-12 sm:px-6 lg:px-8"
+          className="border-y border-white/10 bg-[#100306] px-4 py-12 sm:px-6 lg:px-8"
         >
           <div className="mx-auto max-w-7xl">
             <p className="text-xs uppercase tracking-[0.3em] text-white/45">

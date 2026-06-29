@@ -5,7 +5,7 @@ import { LoginForm } from "./LoginForm";
 export default function AdminLogin() {
   return (
     <>
-      <Header />
+      <Header showSearch={false} />
       <main className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center px-4 py-12">
         <p className="text-xs uppercase tracking-[0.3em] text-white/45">
           Admin access

@@ -56,7 +56,7 @@ export function OrderHistory() {
       {message ? <p className="mt-4 text-sm text-white/55">{message}</p> : null}
       <div className="mt-8 grid gap-4">
         {orders.map((order) => (
-          <article key={order._id} className="rounded-lg border border-white/10 bg-[#100809] p-4">
+          <article key={order._id} className="rounded-lg border border-white/10 bg-[#120407] p-4">
             <div className="flex flex-col justify-between gap-3 sm:flex-row">
               <div>
                 <p className="font-semibold text-white">
@@ -75,7 +75,7 @@ export function OrderHistory() {
                     {item.quantity} x {item.name}
                     {item.color || item.size ? (
                       <span className="block text-xs text-white/40">
-                        {[item.color ? `Colour: ${item.color}` : "", item.size ? `Size: ${item.size}` : ""]
+                        {[item.color ? `Colour / Design: ${item.color}` : "", item.size ? `Size: ${item.size}` : ""]
                           .filter(Boolean)
                           .join(" / ")}
                       </span>

@@ -147,7 +147,7 @@ export function CartCheckout() {
             items.map((item) => (
               <article
                 key={item.cartItemId}
-                className="grid grid-cols-[84px_minmax(0,1fr)] gap-4 rounded-lg border border-white/10 bg-[#11090a] p-3 sm:grid-cols-[96px_minmax(0,1fr)_auto]"
+                className="grid grid-cols-[84px_minmax(0,1fr)] gap-4 rounded-lg border border-white/10 bg-[#140407] p-3 sm:grid-cols-[96px_minmax(0,1fr)_auto]"
               >
                 <div className="relative aspect-square overflow-hidden rounded-md bg-[#1a1011]">
                   <Image src={item.image} alt={item.name} fill sizes="96px" className="object-cover" />
@@ -162,7 +162,7 @@ export function CartCheckout() {
                   <p className="mt-1 text-sm text-white/50">{item.productCode}</p>
                   {item.color || item.size ? (
                     <p className="mt-1 text-sm text-white/45">
-                      {[item.color ? `Colour: ${item.color}` : "", item.size ? `Size: ${item.size}` : ""]
+                      {[item.color ? `Colour / Design: ${item.color}` : "", item.size ? `Size: ${item.size}` : ""]
                         .filter(Boolean)
                         .join(" / ")}
                     </p>
@@ -203,7 +203,7 @@ export function CartCheckout() {
               </article>
             ))
           ) : (
-            <div className="rounded-lg border border-white/10 bg-[#11090a] p-10 text-center">
+            <div className="rounded-lg border border-white/10 bg-[#140407] p-10 text-center">
               <p className="font-display text-3xl text-white">Your cart is empty.</p>
               <Link href="/#catalog" className="mt-5 inline-flex rounded-md bg-white px-5 py-3 text-sm font-semibold text-black">
                 Browse catalog
@@ -213,17 +213,17 @@ export function CartCheckout() {
         </div>
       </section>
 
-      <aside className="rounded-lg border border-white/10 bg-[#11090a] p-5 lg:sticky lg:top-36 lg:self-start">
+      <aside className="rounded-lg border border-white/10 bg-[#140407] p-5 lg:sticky lg:top-36 lg:self-start">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <h2 className="font-display text-3xl font-semibold text-white">Order</h2>
           <p className="text-xl font-semibold text-white">{formatPrice(grandTotal)}</p>
         </div>
 
         <form onSubmit={submitOrder} className="mt-5 space-y-4">
-          <input name="customerName" required placeholder="Full name" className="h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
-          <input name="customerEmail" required type="email" placeholder="Email" className="h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
-          <input name="customerPhone" required placeholder="Phone number" className="h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
-          <textarea name="shippingAddress" required rows={4} placeholder="Delivery address" className="w-full rounded-md border border-white/10 bg-[#170d0f] px-3 py-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
+          <input name="customerName" required placeholder="Full name" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
+          <input name="customerEmail" required type="email" placeholder="Email" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
+          <input name="customerPhone" required placeholder="Phone number" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
+          <textarea name="shippingAddress" required rows={4} placeholder="Delivery address" className="w-full rounded-md border border-white/10 bg-[#1a060b] px-3 py-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
 
           <label className="block space-y-2">
             <span className="text-xs uppercase tracking-[0.22em] text-white/45">
@@ -234,7 +234,7 @@ export function CartCheckout() {
               onChange={(event) =>
                 setShippingCountry(event.target.value as keyof typeof SHIPPING_OPTIONS)
               }
-              className="h-11 w-full rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm text-white outline-none focus:border-white/35"
+              className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none focus:border-white/35"
             >
               <option value="Malaysia">Malaysia - RM 15</option>
               <option value="Singapore">Singapore - RM 30</option>
@@ -246,7 +246,7 @@ export function CartCheckout() {
               value={promoInput}
               onChange={(event) => setPromoInput(event.target.value.toUpperCase())}
               placeholder="Promo code"
-              className="h-11 rounded-md border border-white/10 bg-[#170d0f] px-3 text-sm uppercase text-white outline-none placeholder:text-white/35 focus:border-white/35"
+              className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm uppercase text-white outline-none placeholder:text-white/35 focus:border-white/35"
             />
             <button
               type="button"
@@ -336,7 +336,7 @@ export function CartCheckout() {
           <button
             type="submit"
             disabled={!canCheckout || loading}
-            className="h-12 w-full rounded-md bg-[#8b1d32] px-5 text-sm font-semibold text-white transition hover:bg-[#a42a42] disabled:opacity-55"
+            className="h-12 w-full rounded-md bg-[#7f1730] px-5 text-sm font-semibold text-white transition hover:bg-[#9a1d3a] disabled:opacity-55"
           >
             {loading ? "Processing..." : paymentMethod === "stripe" ? "Pay with Stripe" : "Submit QR Order"}
           </button>

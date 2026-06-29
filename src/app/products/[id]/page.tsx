@@ -71,7 +71,7 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
               </div>
               {product.colors?.length ? (
                 <div>
-                  <dt className="text-white/40">Colours</dt>
+                  <dt className="text-white/40">Colour / Design</dt>
                   <dd className="mt-1 font-medium text-white">
                     {product.colors.join(", ")}
                   </dd>

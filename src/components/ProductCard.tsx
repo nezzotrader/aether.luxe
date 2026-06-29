@@ -13,7 +13,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const hasOptions = Boolean(product.colors?.length || product.sizes?.length);
 
   return (
-    <article className="group overflow-hidden rounded-lg border border-white/10 bg-[#150b0d] transition hover:border-white/25">
+    <article className="group overflow-hidden rounded-lg border border-white/10 bg-[#160409] transition hover:border-white/25">
       <Link href={`/products/${product._id}`} className="block">
         <div className="relative">
           <ProductImageCarousel images={product.images} name={product.name} />

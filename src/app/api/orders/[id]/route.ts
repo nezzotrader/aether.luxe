@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { serializeOrder } from "@/lib/orders";
+import { sendInvoiceEmail } from "@/lib/emailjs";
 import { orderStatusSchema } from "@/lib/validators";
 import { OrderModel } from "@/models/Order";
 
@@ -54,5 +55,13 @@ export async function PUT(request: Request, context: OrderRouteContext) {
     return NextResponse.json({ message: "Order not found." }, { status: 404 });
   }
 
-  return NextResponse.json({ order: serializeOrder(order.toObject()) });
+  const serializedOrder = serializeOrder(order.toObject());
+  let emailResult = { sent: false, message: "" };
+
+  if (parsed.data.paymentStatus === "confirmed") {
+    const invoiceUrl = `${new URL(request.url).origin}/invoice/${id}`;
+    emailResult = await sendInvoiceEmail(serializedOrder, invoiceUrl);
+  }
+
+  return NextResponse.json({ order: serializedOrder, email: emailResult });
 }
