@@ -16,6 +16,7 @@ export function ProductCard({ product }: ProductCardProps) {
             images={product.images}
             name={product.name}
             quality={95}
+            zoomOnHover
           />
         </div>
       </Link>

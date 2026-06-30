@@ -10,6 +10,7 @@ type ProductImageCarouselProps = {
   priority?: boolean;
   sizes?: string;
   quality?: number;
+  zoomOnHover?: boolean;
 };
 
 export function ProductImageCarousel({
@@ -18,6 +19,7 @@ export function ProductImageCarousel({
   priority = false,
   sizes = "(min-width: 1280px) 20vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 50vw",
   quality = 92,
+  zoomOnHover = false,
 }: ProductImageCarouselProps) {
   const safeImages = images.length ? images : ["/swan.svg"];
   const [index, setIndex] = useState(0);
@@ -36,7 +38,11 @@ export function ProductImageCarousel({
         priority={priority}
         sizes={sizes}
         quality={quality}
-        className="object-cover"
+        className={`object-cover ${
+          zoomOnHover
+            ? "transition-transform duration-500 ease-out group-hover:scale-110 group-focus-within:scale-105"
+            : ""
+        }`}
       />
       {safeImages.length > 1 ? (
         <>

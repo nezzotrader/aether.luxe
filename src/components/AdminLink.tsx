@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ShieldUser } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { Order } from "@/types/product";
 
 export function AdminLink() {
   const [pendingOrders, setPendingOrders] = useState(0);
@@ -13,7 +12,9 @@ export function AdminLink() {
 
     async function loadPendingOrders() {
       try {
-        const response = await fetch("/api/orders", { cache: "no-store" });
+        const response = await fetch("/api/orders/pending-count", {
+          cache: "no-store",
+        });
 
         if (!response.ok) {
           if (active) {
@@ -22,13 +23,10 @@ export function AdminLink() {
           return;
         }
 
-        const data = (await response.json()) as { orders?: Order[] };
-        const pending = (data.orders || []).filter(
-          (order) => order.paymentStatus === "pending_receipt",
-        ).length;
+        const data = (await response.json()) as { pendingOrders?: number };
 
         if (active) {
-          setPendingOrders(pending);
+          setPendingOrders(data.pendingOrders || 0);
         }
       } catch {
         if (active) {

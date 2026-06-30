@@ -50,6 +50,15 @@ export async function getOrders() {
   return orders.map(serializeOrder);
 }
 
+export async function getPendingOrderCount() {
+  if (!hasDatabaseConfig()) {
+    return 0;
+  }
+
+  await connectToDatabase();
+  return OrderModel.countDocuments({ paymentStatus: "pending_receipt" });
+}
+
 export async function getCustomerOrders(email: string) {
   if (!hasDatabaseConfig()) {
     return [];
