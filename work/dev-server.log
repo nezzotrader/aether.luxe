@@ -6,16 +6,9 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.1.8:3000
 - Environments: .env.local
-✓ Ready in 1447ms
+✓ Ready in 1435ms
 
- GET /api/store-config 200 in 469ms (next.js: 406ms, application-code: 63ms)
- GET / 200 in 2.8s (next.js: 261ms, application-code: 2.6s)
- GET / 200 in 553ms (next.js: 20ms, application-code: 533ms)
- GET /admin 200 in 1082ms (next.js: 201ms, application-code: 881ms)
- GET /api/auth/session 200 in 1845ms (next.js: 1784ms, application-code: 61ms)
- GET /orders 200 in 327ms (next.js: 97ms, application-code: 231ms)
- GET /api/auth/session 200 in 67ms (next.js: 27ms, application-code: 40ms)
- GET /cart 200 in 197ms (next.js: 115ms, application-code: 81ms)
- GET /api/store-config 200 in 28ms (next.js: 13ms, application-code: 16ms)
- GET /api/store-config 200 in 49ms (next.js: 33ms, application-code: 16ms)
- GET /api/store-config 200 in 23ms (next.js: 7ms, application-code: 16ms)
+ GET /cart 200 in 1287ms (next.js: 454ms, application-code: 832ms)
+ GET /api/store-config 200 in 213ms (next.js: 167ms, application-code: 46ms)
+ GET / 200 in 3.4s (next.js: 103ms, application-code: 3.3s)
+ GET /products/6a43083fb0c79832c1e4655a 200 in 3.2s (next.js: 3.0s, application-code: 237ms)

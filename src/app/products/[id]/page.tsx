@@ -34,7 +34,13 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
 
         <section className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
           <div className="overflow-hidden rounded-lg border border-white/10 bg-[#111111]">
-            <ProductImageCarousel images={product.images} name={product.name} priority />
+            <ProductImageCarousel
+              images={product.images}
+              name={product.name}
+              priority
+              sizes="(min-width: 1280px) 700px, (min-width: 1024px) 58vw, 100vw"
+              quality={100}
+            />
           </div>
 
           <aside className="lg:sticky lg:top-36 lg:self-start">

@@ -1,0 +1,16 @@
+[browser] Image with src "https://res.cloudinary.com/dcjf2xdou/image/upload/v1782699908/photo_2026-06-29_10-24-51_vz9jfj.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[browser] Image with src "https://res.cloudinary.com/dcjf2xdou/image/upload/v1782777873/aether-luxe/jpjzdwn4kmqte0a8pica.jpg" is using quality "95" which is not configured in images.qualities [75]. Please update your config to [75, 95].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[browser] Image with src "https://res.cloudinary.com/dcjf2xdou/image/upload/v1782777873/aether-luxe/jpjzdwn4kmqte0a8pica.jpg" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[browser] Image with src "https://res.cloudinary.com/dcjf2xdou/image/upload/v1782777895/aether-luxe/nmlol6stadmtgmiisulg.jpg" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[browser] Image with src "https://res.cloudinary.com/dcjf2xdou/image/upload/v1782777907/aether-luxe/gwra3c3caxphr4psg4o0.jpg" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+Image with src "https://res.cloudinary.com/dcjf2xdou/image/upload/v1782777873/aether-luxe/jpjzdwn4kmqte0a8pica.jpg" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[browser] Image with src "https://res.cloudinary.com/dcjf2xdou/image/upload/v1782777873/aether-luxe/jpjzdwn4kmqte0a8pica.jpg" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[browser] Image with src "https://res.cloudinary.com/dcjf2xdou/image/upload/v1782777895/aether-luxe/nmlol6stadmtgmiisulg.jpg" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities

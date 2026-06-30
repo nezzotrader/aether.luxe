@@ -15,7 +15,6 @@ async function uploadBuffer(buffer: Buffer, folder: string) {
       {
         folder,
         resource_type: "image",
-        transformation: [{ quality: "auto", fetch_format: "auto" }],
       },
       (error, result) => {
         if (error || !result) {

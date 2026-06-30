@@ -16,7 +16,11 @@ export function ProductCard({ product }: ProductCardProps) {
     <article className="group overflow-hidden rounded-lg border border-white/10 bg-[#160409] transition hover:border-white/25">
       <Link href={`/products/${product._id}`} className="block">
         <div className="relative">
-          <ProductImageCarousel images={product.images} name={product.name} />
+          <ProductImageCarousel
+            images={product.images}
+            name={product.name}
+            quality={95}
+          />
           <button
             type="button"
             className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur transition hover:bg-black/70 sm:right-3 sm:top-3 sm:size-9"

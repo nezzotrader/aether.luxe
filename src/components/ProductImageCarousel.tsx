@@ -8,12 +8,16 @@ type ProductImageCarouselProps = {
   images: string[];
   name: string;
   priority?: boolean;
+  sizes?: string;
+  quality?: number;
 };
 
 export function ProductImageCarousel({
   images,
   name,
   priority = false,
+  sizes = "(min-width: 1280px) 20vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 50vw",
+  quality = 92,
 }: ProductImageCarouselProps) {
   const safeImages = images.length ? images : ["/swan.svg"];
   const [index, setIndex] = useState(0);
@@ -30,7 +34,8 @@ export function ProductImageCarousel({
         alt={`${name} image ${index + 1}`}
         fill
         priority={priority}
-        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+        sizes={sizes}
+        quality={quality}
         className="object-cover"
       />
       {safeImages.length > 1 ? (
