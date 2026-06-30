@@ -63,10 +63,20 @@ export async function POST(request: Request) {
     0,
   );
   const shippingFee = SHIPPING_OPTIONS[parsed.data.shippingCountry];
-  const { promoCode, discount } = await calculateDiscount(
+  const promoResult = await calculateDiscount(
     parsed.data.promoCode,
     subtotal,
+    parsed.data.customerEmail,
   );
+  const { promoCode, discount } = promoResult;
+
+  if (parsed.data.promoCode && !promoCode) {
+    return NextResponse.json(
+      { message: promoResult.message || "Promo code is invalid or inactive." },
+      { status: 400 },
+    );
+  }
+
   const total = Math.max(subtotal + shippingFee - discount, 0);
 
   await connectToDatabase();

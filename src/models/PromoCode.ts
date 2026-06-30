@@ -6,6 +6,7 @@ const PromoCodeSchema = new Schema(
     type: { type: String, enum: ["fixed", "percent"], required: true },
     value: { type: Number, required: true, min: 0 },
     isActive: { type: Boolean, default: true },
+    oneUsePerEmail: { type: Boolean, default: false },
   },
   {
     timestamps: { createdAt: true, updatedAt: true },

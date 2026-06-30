@@ -7,6 +7,7 @@ import { signOut } from "next-auth/react";
 import {
   Boxes,
   Building2,
+  Copy,
   ExternalLink,
   LayoutDashboard,
   LogOut,
@@ -79,6 +80,7 @@ export function AdminDashboard({
     type: "fixed" as "fixed" | "percent",
     value: 0,
     isActive: true,
+    oneUsePerEmail: false,
   });
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
@@ -94,7 +96,7 @@ export function AdminDashboard({
   const pendingOrders = useMemo(
     () =>
       orders.filter((order) =>
-        ["pending_receipt", "pending_stripe", "paid"].includes(order.paymentStatus),
+        order.paymentStatus === "pending_receipt",
       ).length,
     [orders],
   );
@@ -137,7 +139,13 @@ export function AdminDashboard({
 
   function resetPromoForm() {
     setEditingPromoId(null);
-    setPromoForm({ code: "", type: "fixed", value: 0, isActive: true });
+    setPromoForm({
+      code: "",
+      type: "fixed",
+      value: 0,
+      isActive: true,
+      oneUsePerEmail: false,
+    });
   }
 
   async function handleProductUpload(event: React.ChangeEvent<HTMLInputElement>) {
@@ -381,6 +389,33 @@ export function AdminDashboard({
     }
 
     setMessage(data.message || "Invoice email sent to customer.");
+  }
+
+  async function copyOrderDetails(order: Order) {
+    const itemLines = order.items.map((item) => {
+      const options = [
+        item.color ? `Colour / Design: ${item.color}` : "",
+        item.size ? `Size: ${item.size}` : "",
+      ]
+        .filter(Boolean)
+        .join(" / ");
+
+      return `- ${item.quantity} x ${item.name}${options ? ` (${options})` : ""}`;
+    });
+
+    const text = [
+      `Name: ${order.customerName}`,
+      `Phone: ${order.customerPhone}`,
+      `Email: ${order.customerEmail}`,
+      `Address: ${order.shippingAddress}`,
+      `Shipping: ${order.shippingCountry}`,
+      "Items:",
+      ...itemLines,
+      `Total: ${formatPrice(order.total)}`,
+    ].join("\n");
+
+    await navigator.clipboard.writeText(text);
+    setMessage("Order details copied.");
   }
 
   return (
@@ -717,6 +752,7 @@ export function AdminDashboard({
                           ? `${promo.value}% off`
                           : `${formatPrice(promo.value)} off`}{" "}
                         / {promo.isActive ? "Active" : "Inactive"}
+                        {promo.oneUsePerEmail ? " / One use per email" : ""}
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -729,6 +765,7 @@ export function AdminDashboard({
                             type: promo.type,
                             value: promo.value,
                             isActive: promo.isActive,
+                            oneUsePerEmail: promo.oneUsePerEmail,
                           });
                         }}
                         className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70"
@@ -802,6 +839,25 @@ export function AdminDashboard({
                 />
                 Active
               </label>
+              <label className="mt-3 flex items-start gap-2 text-sm text-white/70">
+                <input
+                  type="checkbox"
+                  checked={promoForm.oneUsePerEmail}
+                  onChange={(event) =>
+                    setPromoForm({
+                      ...promoForm,
+                      oneUsePerEmail: event.target.checked,
+                    })
+                  }
+                  className="mt-1"
+                />
+                <span>
+                  One use per email
+                  <span className="mt-1 block text-xs text-white/40">
+                    Customer can only use this code once with the same email.
+                  </span>
+                </span>
+              </label>
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <button
                   type="button"
@@ -868,15 +924,29 @@ export function AdminDashboard({
                   ) : null}
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
+                  <button type="button" onClick={() => copyOrderDetails(order)} className="inline-flex h-10 items-center gap-2 rounded-md border border-white/10 px-3 text-sm text-white/75">
+                    <Copy className="size-4" aria-hidden="true" />
+                    Copy order
+                  </button>
                   {order.receiptUrl ? (
                     <a href={order.receiptUrl} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center rounded-md border border-white/10 px-3 text-sm text-white/75">View receipt</a>
                   ) : null}
-                  <button type="button" onClick={() => updateOrder(order._id, "confirmed")} className="h-10 rounded-md bg-green-700 px-3 text-sm font-semibold text-white">Confirm</button>
-                  <button type="button" onClick={() => updateOrder(order._id, "rejected")} className="h-10 rounded-md bg-red-800 px-3 text-sm font-semibold text-white">Reject</button>
+                  {order.paymentStatus === "pending_receipt" ? (
+                    <>
+                      <button type="button" onClick={() => updateOrder(order._id, "confirmed")} className="h-10 rounded-md bg-green-700 px-3 text-sm font-semibold text-white">Confirm</button>
+                      <button type="button" onClick={() => updateOrder(order._id, "rejected")} className="h-10 rounded-md bg-red-800 px-3 text-sm font-semibold text-white">Reject</button>
+                    </>
+                  ) : null}
                   {order.paymentStatus === "confirmed" ? (
                     <>
                       <a href={`/invoice/${order._id}`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center rounded-md border border-white/10 px-3 text-sm text-white/75">Invoice</a>
                       <button type="button" onClick={() => sendInvoiceEmail(order._id)} className="inline-flex h-10 items-center rounded-md border border-white/10 px-3 text-sm text-white/75">Send invoice</button>
+                      <button type="button" onClick={() => updateOrder(order._id, "rejected")} className="h-10 rounded-md bg-red-900 px-3 text-sm font-semibold text-white">Delete order</button>
+                      {order.invoiceEmailSentAt ? (
+                        <span className="inline-flex h-10 items-center rounded-md border border-white/10 px-3 text-xs text-white/45">
+                          Email accepted
+                        </span>
+                      ) : null}
                     </>
                   ) : null}
                 </div>

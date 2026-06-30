@@ -4,7 +4,7 @@ import { Header } from "@/components/Header";
 export default function AboutPage() {
   return (
     <>
-      <Header />
+      <Header showSearch={false} />
       <main className="mx-auto grid min-h-[58vh] max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-white/45">

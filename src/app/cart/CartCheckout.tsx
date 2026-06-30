@@ -16,6 +16,7 @@ export function CartCheckout() {
   const [promoInput, setPromoInput] = useState("");
   const [appliedPromo, setAppliedPromo] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [customerEmail, setCustomerEmail] = useState("");
   const [receiptUrl, setReceiptUrl] = useState("");
   const [qrImage, setQrImage] = useState("");
   const [qrLoadError, setQrLoadError] = useState(false);
@@ -75,7 +76,7 @@ export function CartCheckout() {
     const response = await fetch("/api/promos/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: promoInput, subtotal }),
+      body: JSON.stringify({ code: promoInput, subtotal, customerEmail }),
     });
     const data = await response.json();
     setLoading(false);
@@ -229,7 +230,15 @@ export function CartCheckout() {
 
         <form onSubmit={submitOrder} className="mt-5 space-y-4">
           <input name="customerName" required placeholder="Full name" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
-          <input name="customerEmail" required type="email" placeholder="Email" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
+          <input
+            name="customerEmail"
+            required
+            type="email"
+            value={customerEmail}
+            onChange={(event) => setCustomerEmail(event.target.value)}
+            placeholder="Email"
+            className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35"
+          />
           <input name="customerPhone" required placeholder="Phone number" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
           <div className="space-y-3 rounded-md border border-white/10 bg-black/20 p-3">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/45">

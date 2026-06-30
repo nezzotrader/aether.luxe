@@ -5,7 +5,7 @@ import { CartCheckout } from "./CartCheckout";
 export default function CartPage() {
   return (
     <>
-      <Header />
+      <Header showSearch={false} />
       <CartCheckout />
       <Footer />
     </>

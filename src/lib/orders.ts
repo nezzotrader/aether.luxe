@@ -2,9 +2,10 @@ import { connectToDatabase, hasDatabaseConfig } from "./db";
 import { OrderModel } from "@/models/Order";
 import type { Order } from "@/types/product";
 
-type OrderDocument = Omit<Order, "_id" | "createdAt"> & {
+type OrderDocument = Omit<Order, "_id" | "createdAt" | "invoiceEmailSentAt"> & {
   _id: { toString: () => string };
   createdAt: Date;
+  invoiceEmailSentAt?: Date;
 };
 
 export function serializeOrder(order: OrderDocument): Order {
@@ -31,6 +32,7 @@ export function serializeOrder(order: OrderDocument): Order {
     receiptUrl: order.receiptUrl,
     stripeSessionId: order.stripeSessionId,
     invoiceNumber: order.invoiceNumber,
+    invoiceEmailSentAt: order.invoiceEmailSentAt?.toISOString(),
     createdAt: order.createdAt.toISOString(),
   };
 }

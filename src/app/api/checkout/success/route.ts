@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
+import { sendInvoiceEmail } from "@/lib/emailjs";
+import { serializeOrder } from "@/lib/orders";
 import { getStripe } from "@/lib/stripe";
 import { OrderModel } from "@/models/Order";
 
@@ -23,11 +25,29 @@ export async function POST(request: Request) {
 
   if (orderId) {
     await connectToDatabase();
-    await OrderModel.findByIdAndUpdate(orderId, {
-      paymentStatus: "paid",
-      stripeSessionId: session.id,
-    });
+    const order = await OrderModel.findById(orderId);
+
+    if (order) {
+      order.paymentStatus = "confirmed";
+      order.stripeSessionId = session.id;
+      order.invoiceNumber =
+        order.invoiceNumber ||
+        `AETH-${new Date().getFullYear()}-${orderId.slice(-6).toUpperCase()}`;
+      await order.save();
+
+      const serializedOrder = serializeOrder(order.toObject());
+      const invoiceUrl = `${new URL(request.url).origin}/invoice/${orderId}`;
+      const email = await sendInvoiceEmail(serializedOrder, invoiceUrl);
+
+      if (email.sent) {
+        await OrderModel.findByIdAndUpdate(orderId, {
+          invoiceEmailSentAt: new Date(),
+        });
+      }
+
+      return NextResponse.json({ paid: true, confirmed: true, email });
+    }
   }
 
-  return NextResponse.json({ paid: true });
+  return NextResponse.json({ paid: true, confirmed: true });
 }

@@ -61,6 +61,12 @@ export async function PUT(request: Request, context: OrderRouteContext) {
   if (parsed.data.paymentStatus === "confirmed") {
     const invoiceUrl = `${new URL(request.url).origin}/invoice/${id}`;
     emailResult = await sendInvoiceEmail(serializedOrder, invoiceUrl);
+
+    if (emailResult.sent) {
+      await OrderModel.findByIdAndUpdate(id, {
+        invoiceEmailSentAt: new Date(),
+      });
+    }
   }
 
   return NextResponse.json({ order: serializedOrder, email: emailResult });

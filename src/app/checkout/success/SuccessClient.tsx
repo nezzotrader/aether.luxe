@@ -27,7 +27,11 @@ export function SuccessClient() {
       .then((data) => {
         if (data.paid) {
           clearCart();
-          setMessage("Payment received. Your order is now pending admin confirmation.");
+          setMessage(
+            data.email?.sent
+              ? "Payment received. Your order is confirmed and the invoice has been emailed."
+              : "Payment received. Your order is confirmed.",
+          );
           return;
         }
 

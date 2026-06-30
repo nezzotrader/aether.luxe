@@ -5,7 +5,7 @@ import { OrderHistory } from "./OrderHistory";
 export default function OrdersPage() {
   return (
     <>
-      <Header />
+      <Header showSearch={false} />
       <OrderHistory />
       <Footer />
     </>

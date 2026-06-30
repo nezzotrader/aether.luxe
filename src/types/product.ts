@@ -65,6 +65,7 @@ export type Order = {
   receiptUrl?: string;
   stripeSessionId?: string;
   invoiceNumber?: string;
+  invoiceEmailSentAt?: string;
   createdAt: string;
 };
 
@@ -74,5 +75,6 @@ export type PromoCode = {
   type: "fixed" | "percent";
   value: number;
   isActive: boolean;
+  oneUsePerEmail: boolean;
   createdAt: string;
 };

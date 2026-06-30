@@ -71,6 +71,9 @@ export async function sendInvoiceEmail(
         email: order.customerEmail,
         name: order.customerName,
         address: order.shippingAddress,
+        reply_to: process.env.ADMIN_EMAIL || order.customerEmail,
+        from_name: "Aether Luxe",
+        admin_email: process.env.ADMIN_EMAIL || "",
         to_email: order.customerEmail,
         to_name: order.customerName,
         customer_email: order.customerEmail,
@@ -101,5 +104,8 @@ export async function sendInvoiceEmail(
     };
   }
 
-  return { sent: true, message: "Invoice email sent to customer." };
+  return {
+    sent: true,
+    message: `EmailJS accepted invoice email for ${order.customerEmail}. Check EmailJS history, inbox spam, and Gmail sent mail if it does not arrive.`,
+  };
 }

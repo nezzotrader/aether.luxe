@@ -1,8 +1,10 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
+import { connectToDatabase } from "@/lib/db";
 import { sendInvoiceEmail } from "@/lib/emailjs";
 import { getOrderById } from "@/lib/orders";
+import { OrderModel } from "@/models/Order";
 
 export const runtime = "nodejs";
 
@@ -33,6 +35,12 @@ export async function POST(request: Request, context: OrderEmailRouteContext) {
 
   const invoiceUrl = `${new URL(request.url).origin}/invoice/${id}`;
   const result = await sendInvoiceEmail(order, invoiceUrl);
+
+  if (result.sent) {
+    await connectToDatabase();
+    await OrderModel.findByIdAndUpdate(id, { invoiceEmailSentAt: new Date() });
+  }
+
   const status = result.sent ? 200 : 400;
 
   return NextResponse.json(result, { status });

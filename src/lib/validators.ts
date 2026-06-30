@@ -54,11 +54,13 @@ export const promoCodeSchema = z.object({
   type: z.enum(["fixed", "percent"]),
   value: z.coerce.number().nonnegative("Promo value must be 0 or higher."),
   isActive: z.boolean().default(true),
+  oneUsePerEmail: z.boolean().default(false),
 });
 
 export const promoValidationSchema = z.object({
   code: z.string().trim().min(1).transform((value) => value.toUpperCase()),
   subtotal: z.coerce.number().nonnegative(),
+  customerEmail: z.string().trim().email().optional().or(z.literal("")),
 });
 
 export const orderStatusSchema = z.object({

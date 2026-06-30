@@ -47,6 +47,7 @@ const OrderSchema = new Schema(
     receiptUrl: { type: String },
     stripeSessionId: { type: String },
     invoiceNumber: { type: String },
+    invoiceEmailSentAt: { type: Date },
   },
   {
     timestamps: { createdAt: true, updatedAt: true },
