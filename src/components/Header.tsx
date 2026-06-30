@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Search, ShieldUser, UserRound } from "lucide-react";
 import { CartLink } from "./CartLink";
+import { MobileMenu } from "./MobileMenu";
 
 type HeaderProps = {
   search?: string;
@@ -18,7 +19,41 @@ export function Header({ search = "", showSearch = true }: HeaderProps) {
   return (
     <header className="border-b border-white/10 bg-[#070102]/95">
       <div className="mx-auto grid w-full max-w-7xl gap-2 px-4 py-2.5 sm:gap-3 sm:px-6 sm:py-4 lg:px-8">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 md:grid-cols-[1fr_auto_1fr] md:gap-3">
+        <div className="relative flex h-14 items-center justify-between md:hidden">
+          <MobileMenu navItems={NAV_ITEMS} />
+
+          <Link
+            href="/"
+            className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center text-center"
+          >
+            <span className="font-display text-xl font-semibold uppercase tracking-[0.24em] text-white">
+              Aether
+            </span>
+            <span className="text-[8px] uppercase tracking-[0.24em] text-white/45">
+              Luxe by Azfar
+            </span>
+          </Link>
+
+          <div className="ml-auto flex items-center justify-end gap-1">
+            <CartLink />
+            <Link
+              href="/orders"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-2 text-sm text-white/80 transition hover:border-white/35 hover:text-white md:px-3"
+            >
+              <UserRound className="size-4" aria-hidden="true" />
+              <span className="hidden md:inline">Profile</span>
+            </Link>
+            <Link
+              href="/admin"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/80 transition hover:border-white/35 hover:text-white md:px-3"
+            >
+              <ShieldUser className="size-4" aria-hidden="true" />
+              <span className="hidden md:inline">Admin</span>
+            </Link>
+          </div>
+        </div>
+
+        <div className="hidden items-center gap-3 md:grid md:grid-cols-[1fr_auto_1fr]">
           <nav className="hidden items-center gap-7 md:flex">
             {NAV_ITEMS.map((item) => (
               <Link
@@ -44,32 +79,20 @@ export function Header({ search = "", showSearch = true }: HeaderProps) {
             <CartLink />
             <Link
               href="/orders"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-2 text-sm text-white/80 transition hover:border-white/35 hover:text-white sm:px-3"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-2 text-sm text-white/80 transition hover:border-white/35 hover:text-white md:px-3"
             >
               <UserRound className="size-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Profile</span>
+              <span className="hidden md:inline">Profile</span>
             </Link>
             <Link
               href="/admin"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/80 transition hover:border-white/35 hover:text-white sm:px-3"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/80 transition hover:border-white/35 hover:text-white md:px-3"
             >
               <ShieldUser className="size-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Admin</span>
+              <span className="hidden md:inline">Admin</span>
             </Link>
           </div>
         </div>
-
-        <nav className="grid grid-cols-4 gap-2 border-y border-white/10 py-2 md:hidden">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="inline-flex h-9 min-w-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.035] px-1 text-center text-[10px] font-semibold uppercase tracking-[0.1em] text-white/75 transition hover:border-white/35 hover:text-white"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
 
         {showSearch ? (
           <form action="/" className="relative mx-auto w-full max-w-4xl">
