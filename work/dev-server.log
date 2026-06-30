@@ -15,3 +15,11 @@
  GET /admin 307 in 168ms (next.js: 11ms, application-code: 157ms)
  GET /admin/login 200 in 314ms (next.js: 92ms, application-code: 222ms)
  POST /api/promos/validate 200 in 1318ms (next.js: 862ms, application-code: 456ms)
+ GET /api/auth/session 200 in 55ms (next.js: 21ms, application-code: 34ms)
+ GET /admin 200 in 753ms (next.js: 14ms, application-code: 739ms)
+ GET /api/auth/session 200 in 46ms (next.js: 23ms, application-code: 23ms)
+ GET /api/auth/session 200 in 51ms (next.js: 17ms, application-code: 34ms)
+ GET / 200 in 154ms (next.js: 6ms, application-code: 148ms)
+✓ Compiled in 730ms
+ GET / 200 in 538ms (next.js: 144ms, application-code: 394ms)
+ GET / 200 in 1422ms (next.js: 8ms, application-code: 1415ms)
