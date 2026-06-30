@@ -15,6 +15,7 @@ export async function POST(request: Request) {
     parsed.data.code,
     parsed.data.subtotal,
     parsed.data.customerEmail || undefined,
+    parsed.data.shippingFee,
   );
 
   if (!result.promoCode) {

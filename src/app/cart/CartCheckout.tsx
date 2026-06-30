@@ -5,14 +5,15 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { CreditCard, Minus, Plus, QrCode, Trash2, Upload } from "lucide-react";
 import { useCart } from "@/components/CartProvider";
-import { SHIPPING_OPTIONS } from "@/lib/constants";
+import { SHIPPING_COUNTRIES, SHIPPING_OPTIONS } from "@/lib/constants";
+import type { ShippingCountry } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
 
 export function CartCheckout() {
   const { items, total: subtotal, updateQuantity, removeItem, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState<"qr" | "stripe">("qr");
   const [shippingCountry, setShippingCountry] =
-    useState<keyof typeof SHIPPING_OPTIONS>("Malaysia");
+    useState<ShippingCountry>("Malaysia");
   const [promoInput, setPromoInput] = useState("");
   const [appliedPromo, setAppliedPromo] = useState("");
   const [discount, setDiscount] = useState(0);
@@ -24,7 +25,8 @@ export function CartCheckout() {
   const [loading, setLoading] = useState(false);
   const canCheckout = useMemo(() => items.length > 0, [items]);
   const shippingFee = SHIPPING_OPTIONS[shippingCountry];
-  const grandTotal = Math.max(subtotal + shippingFee - discount, 0);
+  const effectiveDiscount = appliedPromo === "FREESHIP" ? shippingFee : discount;
+  const grandTotal = Math.max(subtotal + shippingFee - effectiveDiscount, 0);
 
   useEffect(() => {
     fetch("/api/store-config", { cache: "no-store" })
@@ -76,7 +78,12 @@ export function CartCheckout() {
     const response = await fetch("/api/promos/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: promoInput, subtotal, customerEmail }),
+      body: JSON.stringify({
+        code: promoInput,
+        subtotal,
+        shippingFee,
+        customerEmail,
+      }),
     });
     const data = await response.json();
     setLoading(false);
@@ -260,12 +267,15 @@ export function CartCheckout() {
             <select
               value={shippingCountry}
               onChange={(event) =>
-                setShippingCountry(event.target.value as keyof typeof SHIPPING_OPTIONS)
+                setShippingCountry(event.target.value as ShippingCountry)
               }
               className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none focus:border-white/35"
             >
-              <option value="Malaysia">Malaysia - RM 15</option>
-              <option value="Singapore">Singapore - RM 30</option>
+              {SHIPPING_COUNTRIES.map((country) => (
+                <option key={country} value={country}>
+                  {country} - RM {SHIPPING_OPTIONS[country]}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -295,10 +305,10 @@ export function CartCheckout() {
               <span>Shipping ({shippingCountry})</span>
               <span>{formatPrice(shippingFee)}</span>
             </div>
-            {discount ? (
+            {effectiveDiscount ? (
               <div className="flex justify-between text-green-200/80">
                 <span>Promo {appliedPromo}</span>
-                <span>-{formatPrice(discount)}</span>
+                <span>-{formatPrice(effectiveDiscount)}</span>
               </div>
             ) : null}
             <div className="flex justify-between border-t border-white/10 pt-2 font-semibold text-white">

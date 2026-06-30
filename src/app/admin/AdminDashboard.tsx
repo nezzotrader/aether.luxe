@@ -77,8 +77,9 @@ export function AdminDashboard({
   const [brandForm, setBrandForm] = useState({ name: "", isActive: true });
   const [promoForm, setPromoForm] = useState({
     code: "",
-    type: "fixed" as "fixed" | "percent",
+    type: "fixed" as PromoCode["type"],
     value: 0,
+    minSpend: 0,
     isActive: true,
     oneUsePerEmail: false,
   });
@@ -143,6 +144,7 @@ export function AdminDashboard({
       code: "",
       type: "fixed",
       value: 0,
+      minSpend: 0,
       isActive: true,
       oneUsePerEmail: false,
     });
@@ -322,7 +324,10 @@ export function AdminDashboard({
       {
         method: editingPromoId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(promoForm),
+        body: JSON.stringify({
+          ...promoForm,
+          value: promoForm.type === "free_shipping" ? 0 : promoForm.value,
+        }),
       },
     );
     const data = await response.json();
@@ -748,10 +753,13 @@ export function AdminDashboard({
                     <div>
                       <p className="font-semibold text-white">{promo.code}</p>
                       <p className="text-xs text-white/45">
-                        {promo.type === "percent"
+                        {promo.type === "free_shipping"
+                          ? "Free shipping"
+                          : promo.type === "percent"
                           ? `${promo.value}% off`
                           : `${formatPrice(promo.value)} off`}{" "}
                         / {promo.isActive ? "Active" : "Inactive"}
+                        {promo.minSpend ? ` / Min ${formatPrice(promo.minSpend)}` : ""}
                         {promo.oneUsePerEmail ? " / One use per email" : ""}
                       </p>
                     </div>
@@ -764,6 +772,7 @@ export function AdminDashboard({
                             code: promo.code,
                             type: promo.type,
                             value: promo.value,
+                            minSpend: promo.minSpend,
                             isActive: promo.isActive,
                             oneUsePerEmail: promo.oneUsePerEmail,
                           });
@@ -811,13 +820,18 @@ export function AdminDashboard({
                   onChange={(event) =>
                     setPromoForm({
                       ...promoForm,
-                      type: event.target.value as "fixed" | "percent",
+                      type: event.target.value as PromoCode["type"],
+                      value:
+                        event.target.value === "free_shipping"
+                          ? 0
+                          : promoForm.value,
                     })
                   }
                   className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white"
                 >
                   <option value="fixed">Fixed RM</option>
                   <option value="percent">Percent %</option>
+                  <option value="free_shipping">Free shipping</option>
                 </select>
                 <input
                   type="number"
@@ -826,9 +840,26 @@ export function AdminDashboard({
                   onChange={(event) =>
                     setPromoForm({ ...promoForm, value: Number(event.target.value) })
                   }
+                  disabled={promoForm.type === "free_shipping"}
+                  placeholder={
+                    promoForm.type === "free_shipping" ? "Auto" : "Promo value"
+                  }
                   className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white"
                 />
               </div>
+              <input
+                type="number"
+                min="0"
+                value={promoForm.minSpend}
+                onChange={(event) =>
+                  setPromoForm({
+                    ...promoForm,
+                    minSpend: Number(event.target.value),
+                  })
+                }
+                placeholder="Minimum spend (optional)"
+                className="mt-3 h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white"
+              />
               <label className="mt-4 flex items-center gap-2 text-sm text-white/70">
                 <input
                   type="checkbox"

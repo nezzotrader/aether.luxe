@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { SHIPPING_OPTIONS } from "@/lib/constants";
+import type { ShippingCountry } from "@/lib/constants";
 import { connectToDatabase } from "@/lib/db";
 import { getOrders, serializeOrder } from "@/lib/orders";
 import { calculateDiscount } from "@/lib/promos";
@@ -17,7 +18,7 @@ function composeShippingAddress(data: {
   shippingPostcode: string;
   shippingCity: string;
   shippingState: string;
-  shippingCountry: "Malaysia" | "Singapore";
+  shippingCountry: ShippingCountry;
 }) {
   return [
     data.shippingAddressLine1,
@@ -67,6 +68,7 @@ export async function POST(request: Request) {
     parsed.data.promoCode,
     subtotal,
     parsed.data.customerEmail,
+    shippingFee,
   );
   const { promoCode, discount } = promoResult;
 

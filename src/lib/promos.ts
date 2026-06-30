@@ -6,8 +6,9 @@ import type { PromoCode } from "@/types/product";
 type PromoCodeDocument = {
   _id: { toString: () => string };
   code: string;
-  type: "fixed" | "percent";
+  type: "fixed" | "percent" | "free_shipping";
   value: number;
+  minSpend?: number;
   isActive?: boolean;
   oneUsePerEmail?: boolean;
   createdAt: Date;
@@ -19,10 +20,28 @@ export function serializePromoCode(promo: PromoCodeDocument): PromoCode {
     code: promo.code,
     type: promo.type,
     value: promo.value,
+    minSpend: promo.minSpend ?? 0,
     isActive: promo.isActive ?? true,
     oneUsePerEmail: promo.oneUsePerEmail ?? false,
     createdAt: promo.createdAt.toISOString(),
   };
+}
+
+async function ensureFreeShippingPromo() {
+  await PromoCodeModel.updateOne(
+    { code: "FREESHIP" },
+    {
+      $setOnInsert: {
+        code: "FREESHIP",
+        type: "free_shipping",
+        value: 0,
+        minSpend: 0,
+        isActive: true,
+        oneUsePerEmail: false,
+      },
+    },
+    { upsert: true },
+  );
 }
 
 export async function getPromoCodes() {
@@ -31,6 +50,7 @@ export async function getPromoCodes() {
   }
 
   await connectToDatabase();
+  await ensureFreeShippingPromo();
   const promos = await PromoCodeModel.find({})
     .sort({ createdAt: -1 })
     .lean<PromoCodeDocument[]>();
@@ -41,15 +61,21 @@ export async function calculateDiscount(
   code: string | undefined,
   subtotal: number,
   customerEmail?: string | null,
+  shippingFee = 0,
 ) {
   const normalized = code?.trim().toUpperCase();
   const normalizedEmail = customerEmail?.trim().toLowerCase();
 
-  if (!normalized || !hasDatabaseConfig()) {
+  if (!normalized) {
+    return { promoCode: undefined, discount: 0 };
+  }
+
+  if (!hasDatabaseConfig()) {
     return { promoCode: undefined, discount: 0 };
   }
 
   await connectToDatabase();
+  await ensureFreeShippingPromo();
   const promo = await PromoCodeModel.findOne({
     code: normalized,
     isActive: true,
@@ -60,6 +86,16 @@ export async function calculateDiscount(
       promoCode: undefined,
       discount: 0,
       message: "Promo code is invalid or inactive.",
+    };
+  }
+
+  const minSpend = promo.minSpend ?? 0;
+
+  if (minSpend > 0 && subtotal < minSpend) {
+    return {
+      promoCode: undefined,
+      discount: 0,
+      message: `Spend at least ${minSpend} to use this promo code.`,
     };
   }
 
@@ -88,8 +124,13 @@ export async function calculateDiscount(
   }
 
   const rawDiscount =
-    promo.type === "percent" ? subtotal * (promo.value / 100) : promo.value;
-  const discount = Math.min(Math.max(Math.round(rawDiscount), 0), subtotal);
+    promo.type === "free_shipping"
+      ? shippingFee
+      : promo.type === "percent"
+        ? subtotal * (promo.value / 100)
+        : promo.value;
+  const maxDiscount = promo.type === "free_shipping" ? shippingFee : subtotal;
+  const discount = Math.min(Math.max(Math.round(rawDiscount), 0), maxDiscount);
 
   return { promoCode: promo.code, discount };
 }

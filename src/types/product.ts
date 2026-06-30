@@ -1,3 +1,5 @@
+import type { ShippingCountry } from "@/lib/constants";
+
 export type Product = {
   _id: string;
   name: string;
@@ -53,7 +55,7 @@ export type Order = {
   shippingPostcode?: string;
   shippingCity?: string;
   shippingState?: string;
-  shippingCountry: "Malaysia" | "Singapore";
+  shippingCountry: ShippingCountry;
   shippingFee: number;
   subtotal: number;
   promoCode?: string;
@@ -72,8 +74,9 @@ export type Order = {
 export type PromoCode = {
   _id: string;
   code: string;
-  type: "fixed" | "percent";
+  type: "fixed" | "percent" | "free_shipping";
   value: number;
+  minSpend: number;
   isActive: boolean;
   oneUsePerEmail: boolean;
   createdAt: string;

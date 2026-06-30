@@ -1,2 +1,134 @@
-(node:28636) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
-(Use `node --trace-warnings ...` to show where the warning was created)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+      <LoadingBoundary name="admin/" loading={null}>
+        <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+          <RedirectBoundary>
+            <RedirectErrorBoundary router={{...}}>
+              <InnerLayoutRouter url="/admin" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+                <SegmentViewNode type="page" pagePath="admin/page...">
+                  <SegmentTrieNode>
+                  <AdminPage>
+                    <header>
+                    <AdminDashboard initialProducts={[...]} initialBrands={[...]} initialOrders={[...]} ...>
+                      <main className="grid min-h...">
+                        <aside>
+                        <section className="p-4 sm:p-6...">
+                          <div>
+                          <div className="grid gap-6...">
+                            ...
+                              <tr className="border-t b...">
+                                <td>
+                                <td>
+                                <td>
+                                <td>
+                                <td>
+                                <td className="p-4">
+                                  <div className="flex gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={function onClick}
+                                      className="grid size-9 place-items-center rounded-md border border-white/10 text..."
+-                                     fdprocessedid="mjoxj"
+                                    >
+                                    <button
+                                      type="button"
+                                      onClick={function onClick}
+                                      className="grid size-9 place-items-center rounded-md border border-white/10 text..."
+-                                     fdprocessedid="skhax7"
+                                    >
+                            <form onSubmit={function saveProduct} className="rounded-lg...">
+                              <div>
+                              <div className="space-y-3">
+                                <input
+                                  value=""
+                                  onChange={function onChange}
+                                  required={true}
+                                  placeholder="Product name"
+                                  className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm t..."
+-                                 fdprocessedid="v785q"
+                                >
+                                <div className="grid grid-...">
+                                  <select
+                                    value="Chanel"
+                                    onChange={function onChange}
+                                    className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-w..."
+-                                   fdprocessedid="ief52k"
+                                  >
+                                  <select
+                                    value="Bags"
+                                    onChange={function onChange}
+                                    className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-w..."
+-                                   fdprocessedid="sc93gt"
+                                  >
+                                <div className="grid grid-...">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={0}
+                                    onChange={function onChange}
+                                    required={true}
+                                    placeholder="Price"
+                                    className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-w..."
+-                                   fdprocessedid="wxnszm"
+                                  >
+                                  <input
+                                    value=""
+                                    onChange={function onChange}
+                                    required={true}
+                                    placeholder="SKU"
+                                    className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-w..."
+-                                   fdprocessedid="4cbgi4"
+                                  >
+                                <div className="rounded-md...">
+                                  <div>
+                                  <div className="grid gap-3">
+                                    <div className="grid grid-...">
+                                      <input
+                                        value=""
+                                        onChange={function onChange}
+                                        placeholder="Colour / design e.g. Black White Green"
+                                        className="h-10 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm te..."
+-                                       fdprocessedid="kgpbef"
+                                      >
+                                      <button
+                                        type="button"
+                                        onClick={function onClick}
+                                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md borde..."
+-                                       fdprocessedid="9ge08wl"
+                                      >
+                                    <div className="grid grid-...">
+                                      <input
+                                        value=""
+                                        onChange={function onChange}
+                                        placeholder="Size e.g. S, M, L, XL or 42"
+                                        className="h-10 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm te..."
+-                                       fdprocessedid="zele1d"
+                                      >
+                                      <button
+                                        type="button"
+                                        onClick={function onClick}
+                                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md borde..."
+-                                       fdprocessedid="m6low"
+                                      >
+                                ...
+                              <button
+                                type="submit"
+                                disabled={false}
+                                className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md b..."
+-                               fdprocessedid="ivpqg5"
+                              >
+                ...
+              ...
+ 

@@ -17,6 +17,8 @@ This is a catalog, not a traditional ecommerce store. Customers browse products 
 - Working cart and checkout
 - QR payment with customer receipt upload
 - Stripe Checkout payment option
+- International shipping options for Malaysia, Singapore, selected ASEAN countries, East Asia, Oceania, North America, and selected Central Asia/Caucasus countries
+- Built-in `FREESHIP` promo code to waive the selected shipping fee
 - NextAuth credentials login for the owner
 - Admin dashboard for products, brands, and orders
 - Admin can confirm or reject receipt/paid orders

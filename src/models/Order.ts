@@ -1,4 +1,5 @@
 import { Schema, model, models } from "mongoose";
+import { SHIPPING_COUNTRIES } from "@/lib/constants";
 
 const OrderItemSchema = new Schema(
   {
@@ -29,7 +30,7 @@ const OrderSchema = new Schema(
     shippingState: { type: String, trim: true },
     shippingCountry: {
       type: String,
-      enum: ["Malaysia", "Singapore"],
+      enum: SHIPPING_COUNTRIES,
       default: "Malaysia",
     },
     shippingFee: { type: Number, default: 15, min: 0 },

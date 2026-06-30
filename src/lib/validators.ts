@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CATEGORIES, PAYMENT_METHODS } from "./constants";
+import { CATEGORIES, PAYMENT_METHODS, SHIPPING_COUNTRIES } from "./constants";
 
 export const productSchema = z.object({
   name: z.string().trim().min(2, "Product name is required."),
@@ -42,7 +42,7 @@ export const checkoutSchema = z.object({
   shippingPostcode: z.string().trim().min(3, "Postcode is required."),
   shippingCity: z.string().trim().min(2, "City is required."),
   shippingState: z.string().trim().min(2, "State is required."),
-  shippingCountry: z.enum(["Malaysia", "Singapore"]).default("Malaysia"),
+  shippingCountry: z.enum(SHIPPING_COUNTRIES).default("Malaysia"),
   promoCode: z.string().trim().optional(),
   paymentMethod: z.enum(PAYMENT_METHODS),
   receiptUrl: z.string().url().optional(),
@@ -51,8 +51,9 @@ export const checkoutSchema = z.object({
 
 export const promoCodeSchema = z.object({
   code: z.string().trim().min(2, "Promo code is required.").transform((value) => value.toUpperCase()),
-  type: z.enum(["fixed", "percent"]),
+  type: z.enum(["fixed", "percent", "free_shipping"]),
   value: z.coerce.number().nonnegative("Promo value must be 0 or higher."),
+  minSpend: z.coerce.number().nonnegative("Minimum spend must be 0 or higher.").default(0),
   isActive: z.boolean().default(true),
   oneUsePerEmail: z.boolean().default(false),
 });
@@ -60,6 +61,7 @@ export const promoCodeSchema = z.object({
 export const promoValidationSchema = z.object({
   code: z.string().trim().min(1).transform((value) => value.toUpperCase()),
   subtotal: z.coerce.number().nonnegative(),
+  shippingFee: z.coerce.number().nonnegative().default(0),
   customerEmail: z.string().trim().email().optional().or(z.literal("")),
 });
 
