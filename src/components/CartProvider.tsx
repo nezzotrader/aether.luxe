@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CartItem, Product } from "@/types/product";
+import type { CartItem, Product, SelectedCustomOption } from "@/types/product";
 
 type CartContextValue = {
   items: CartItem[];
@@ -16,11 +16,11 @@ type CartContextValue = {
   total: number;
   addProduct: (
     product: Product,
-    selection?: { color?: string; size?: string },
+    selection?: { color?: string; size?: string; options?: SelectedCustomOption[] },
   ) => void;
   buyNow: (
     product: Product,
-    selection?: { color?: string; size?: string },
+    selection?: { color?: string; size?: string; options?: SelectedCustomOption[] },
   ) => void;
   updateQuantity: (cartItemId: string, quantity: number) => void;
   removeItem: (cartItemId: string) => void;
@@ -29,8 +29,26 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-function buildCartItemId(productId: string, color = "", size = "") {
-  return [productId, color, size].join("::");
+function normalizeSelectedOptions(options: SelectedCustomOption[] = []) {
+  return options
+    .filter((option) => option.name && option.value)
+    .map((option) => ({
+      name: option.name.trim(),
+      value: option.value.trim(),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function buildCartItemId(
+  productId: string,
+  color = "",
+  size = "",
+  options: SelectedCustomOption[] = [],
+) {
+  const optionKey = normalizeSelectedOptions(options)
+    .map((option) => `${option.name}:${option.value}`)
+    .join("|");
+  return [productId, color, size, optionKey].join("::");
 }
 
 function normalizeCartItem(item: CartItem): CartItem {
@@ -38,19 +56,30 @@ function normalizeCartItem(item: CartItem): CartItem {
     ...item,
     cartItemId:
       item.cartItemId ||
-      buildCartItemId(item.productId, item.color || "", item.size || ""),
+      buildCartItemId(
+        item.productId,
+        item.color || "",
+        item.size || "",
+        item.options || [],
+      ),
+    options: normalizeSelectedOptions(item.options || []),
   };
 }
 
 function toCartItem(
   product: Product,
-  selection: { color?: string; size?: string } = {},
+  selection: {
+    color?: string;
+    size?: string;
+    options?: SelectedCustomOption[];
+  } = {},
 ): CartItem {
   const color = selection.color?.trim() || undefined;
   const size = selection.size?.trim() || undefined;
+  const options = normalizeSelectedOptions(selection.options || []);
 
   return {
-    cartItemId: buildCartItemId(product._id, color || "", size || ""),
+    cartItemId: buildCartItemId(product._id, color || "", size || "", options),
     productId: product._id,
     name: product.name,
     brand: product.brand,
@@ -59,6 +88,7 @@ function toCartItem(
     productCode: product.productCode,
     color,
     size,
+    options,
     quantity: 1,
   };
 }

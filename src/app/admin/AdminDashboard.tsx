@@ -41,6 +41,7 @@ function makeEmptyProduct(brand = ""): ProductPayload {
     images: [],
     colors: [],
     sizes: [],
+    customOptions: [],
     isActive: true,
   };
 }
@@ -74,6 +75,8 @@ export function AdminDashboard({
   );
   const [productColorInput, setProductColorInput] = useState("");
   const [productSizeInput, setProductSizeInput] = useState("");
+  const [productCustomOptionName, setProductCustomOptionName] = useState("");
+  const [productCustomOptionValues, setProductCustomOptionValues] = useState("");
   const [brandForm, setBrandForm] = useState({ name: "", isActive: true });
   const [promoForm, setPromoForm] = useState({
     code: "",
@@ -132,6 +135,8 @@ export function AdminDashboard({
     setProductForm(makeEmptyProduct(brands[0]?.name || ""));
     setProductColorInput("");
     setProductSizeInput("");
+    setProductCustomOptionName("");
+    setProductCustomOptionValues("");
   }
 
   function resetBrandForm() {
@@ -224,10 +229,13 @@ export function AdminDashboard({
       images: product.images,
       colors: product.colors || [],
       sizes: product.sizes || [],
+      customOptions: product.customOptions || [],
       isActive: product.isActive,
     });
     setProductColorInput("");
     setProductSizeInput("");
+    setProductCustomOptionName("");
+    setProductCustomOptionValues("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -256,6 +264,57 @@ export function AdminDashboard({
     setProductForm((current) => ({
       ...current,
       [field]: (current[field] || []).filter((item) => item !== value),
+    }));
+  }
+
+  function addCustomProductOption() {
+    const name = productCustomOptionName.trim();
+    const values = splitOptions(productCustomOptionValues);
+
+    if (!name || !values.length) {
+      setMessage("Add a custom option name and at least one value.");
+      return;
+    }
+
+    setProductForm((current) => {
+      const existing = current.customOptions || [];
+      const nextOption = {
+        name,
+        values: Array.from(new Set(values)),
+      };
+      const optionIndex = existing.findIndex(
+        (option) => option.name.toLowerCase() === name.toLowerCase(),
+      );
+
+      if (optionIndex === -1) {
+        return {
+          ...current,
+          customOptions: [...existing, nextOption],
+        };
+      }
+
+      return {
+        ...current,
+        customOptions: existing.map((option, index) =>
+          index === optionIndex
+            ? {
+                name: option.name,
+                values: Array.from(new Set([...option.values, ...values])),
+              }
+            : option,
+        ),
+      };
+    });
+    setProductCustomOptionName("");
+    setProductCustomOptionValues("");
+  }
+
+  function removeCustomProductOption(name: string) {
+    setProductForm((current) => ({
+      ...current,
+      customOptions: (current.customOptions || []).filter(
+        (option) => option.name !== name,
+      ),
     }));
   }
 
@@ -457,6 +516,7 @@ export function AdminDashboard({
       const options = [
         item.color ? `Colour / Design: ${item.color}` : "",
         item.size ? `Size: ${item.size}` : "",
+        ...(item.options || []).map((option) => `${option.name}: ${option.value}`),
       ]
         .filter(Boolean)
         .join(" / ");
@@ -592,9 +652,9 @@ export function AdminDashboard({
                             <div>
                               <p className="font-medium text-white">{product.name}</p>
                               <p className="text-xs text-white/40">SKU: {product.productCode}</p>
-                              {product.colors?.length || product.sizes?.length ? (
+                              {product.colors?.length || product.sizes?.length || product.customOptions?.length ? (
                                 <p className="mt-1 text-xs text-white/35">
-                                  {[product.colors?.length ? `Colour / Design: ${joinOptions(product.colors)}` : "", product.sizes?.length ? `Sizes: ${joinOptions(product.sizes)}` : ""]
+                                  {[product.colors?.length ? `Colour / Design: ${joinOptions(product.colors)}` : "", product.sizes?.length ? `Sizes: ${joinOptions(product.sizes)}` : "", product.customOptions?.length ? product.customOptions.map((option) => `${option.name}: ${joinOptions(option.values)}`).join(" / ") : ""]
                                     .filter(Boolean)
                                     .join(" / ")}
                                 </p>
@@ -727,6 +787,53 @@ export function AdminDashboard({
                         ))}
                       </div>
                     ) : null}
+                    <div className="rounded-md border border-white/10 bg-black/20 p-3">
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/45">
+                        Custom option
+                      </p>
+                      <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                        <input
+                          value={productCustomOptionName}
+                          onChange={(event) => setProductCustomOptionName(event.target.value)}
+                          placeholder="Option name e.g. Heel Height"
+                          className="h-10 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white placeholder:text-white/35"
+                        />
+                        <input
+                          value={productCustomOptionValues}
+                          onChange={(event) => setProductCustomOptionValues(event.target.value)}
+                          placeholder="Values e.g. 8cm, 10cm"
+                          className="h-10 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white placeholder:text-white/35"
+                        />
+                        <button
+                          type="button"
+                          onClick={addCustomProductOption}
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-xs font-semibold text-white/75 transition hover:border-white/35"
+                        >
+                          <Plus className="size-4" aria-hidden="true" />
+                          Add
+                        </button>
+                      </div>
+                      {productForm.customOptions?.length ? (
+                        <div className="mt-3 grid gap-2">
+                          {productForm.customOptions.map((option) => (
+                            <button
+                              key={option.name}
+                              type="button"
+                              onClick={() => removeCustomProductOption(option.name)}
+                              className="flex min-h-9 items-center justify-between gap-3 rounded-md bg-white/10 px-3 py-2 text-left text-xs text-white"
+                            >
+                              <span>
+                                <span className="font-semibold">{option.name}</span>
+                                <span className="block text-white/45">
+                                  {joinOptions(option.values)}
+                                </span>
+                              </span>
+                              <X className="size-3 shrink-0" aria-hidden="true" />
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
                 <textarea value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} required rows={4} placeholder="Description" className="w-full rounded-md border border-white/10 bg-[#1a060b] px-3 py-3 text-sm text-white" />
@@ -1013,6 +1120,13 @@ export function AdminDashboard({
                           <span className="block text-xs text-white/40">
                             {[item.color ? `Colour / Design: ${item.color}` : "", item.size ? `Size: ${item.size}` : ""]
                               .filter(Boolean)
+                              .join(" / ")}
+                          </span>
+                        ) : null}
+                        {item.options?.length ? (
+                          <span className="block text-xs text-white/40">
+                            {item.options
+                              .map((option) => `${option.name}: ${option.value}`)
                               .join(" / ")}
                           </span>
                         ) : null}

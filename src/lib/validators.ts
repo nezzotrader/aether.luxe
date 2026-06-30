@@ -11,6 +11,10 @@ export const productSchema = z.object({
   images: z.array(z.string().url()).min(1, "Upload at least one image."),
   colors: z.array(z.string().trim().min(1)).default([]),
   sizes: z.array(z.string().trim().min(1)).default([]),
+  customOptions: z.array(z.object({
+    name: z.string().trim().min(1, "Option name is required."),
+    values: z.array(z.string().trim().min(1)).min(1, "Add at least one option value."),
+  })).default([]),
   isActive: z.boolean().default(true),
 });
 
@@ -29,6 +33,10 @@ export const cartItemSchema = z.object({
   productCode: z.string().trim().min(1),
   color: z.string().trim().optional(),
   size: z.string().trim().optional(),
+  options: z.array(z.object({
+    name: z.string().trim().min(1),
+    value: z.string().trim().min(1),
+  })).default([]),
   quantity: z.coerce.number().int().min(1).max(99),
 });
 

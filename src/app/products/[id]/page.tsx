@@ -96,6 +96,14 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
                   </dd>
                 </div>
               ) : null}
+              {product.customOptions?.map((option) => (
+                <div key={option.name}>
+                  <dt className="text-white/40">{option.name}</dt>
+                  <dd className="mt-1 font-medium text-white">
+                    {option.values.join(", ")}
+                  </dd>
+                </div>
+              ))}
             </dl>
 
             <p className="mt-7 whitespace-pre-line text-base leading-7 text-white/62">

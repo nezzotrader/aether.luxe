@@ -196,6 +196,13 @@ export function CartCheckout() {
                         .join(" / ")}
                     </p>
                   ) : null}
+                  {item.options?.length ? (
+                    <p className="mt-1 text-sm text-white/45">
+                      {item.options
+                        .map((option) => `${option.name}: ${option.value}`)
+                        .join(" / ")}
+                    </p>
+                  ) : null}
                   <p className="mt-2 text-sm font-semibold text-white">
                     {formatPrice(item.price)}
                   </p>

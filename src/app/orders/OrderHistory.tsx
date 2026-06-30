@@ -80,6 +80,13 @@ export function OrderHistory() {
                           .join(" / ")}
                       </span>
                     ) : null}
+                    {item.options?.length ? (
+                      <span className="block text-xs text-white/40">
+                        {item.options
+                          .map((option) => `${option.name}: ${option.value}`)
+                          .join(" / ")}
+                      </span>
+                    ) : null}
                   </span>
                   <span>{formatPrice(item.price * item.quantity)}</span>
                 </div>

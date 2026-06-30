@@ -15,6 +15,7 @@ type ProductDocument = {
   images: string[];
   colors?: string[];
   sizes?: string[];
+  customOptions?: Product["customOptions"];
   soldCount?: number;
   isActive?: boolean;
   createdAt: Date;
@@ -45,6 +46,7 @@ export function serializeProduct(
     images: product.images,
     colors: product.colors || [],
     sizes: product.sizes || [],
+    customOptions: product.customOptions || [],
     soldCount,
     isActive: product.isActive ?? true,
     createdAt: product.createdAt.toISOString(),

@@ -1,5 +1,15 @@
 import type { ShippingCountry } from "@/lib/constants";
 
+export type ProductCustomOption = {
+  name: string;
+  values: string[];
+};
+
+export type SelectedCustomOption = {
+  name: string;
+  value: string;
+};
+
 export type Product = {
   _id: string;
   name: string;
@@ -11,6 +21,7 @@ export type Product = {
   images: string[];
   colors?: string[];
   sizes?: string[];
+  customOptions?: ProductCustomOption[];
   soldCount?: number;
   isActive: boolean;
   createdAt: string;
@@ -35,6 +46,7 @@ export type CartItem = {
   productCode: string;
   color?: string;
   size?: string;
+  options?: SelectedCustomOption[];
   quantity: number;
 };
 

@@ -65,6 +65,7 @@ function formatOrderItems(order: Order) {
       const options = [
         item.color ? `Colour / Design: ${item.color}` : "",
         item.size ? `Size: ${item.size}` : "",
+        ...(item.options || []).map((option) => `${option.name}: ${option.value}`),
       ]
         .filter(Boolean)
         .join(" / ");
@@ -79,6 +80,7 @@ function renderItemRows(order: Order) {
       const options = [
         item.color ? `Colour / Design: ${item.color}` : "",
         item.size ? `Size: ${item.size}` : "",
+        ...(item.options || []).map((option) => `${option.name}: ${option.value}`),
       ]
         .filter(Boolean)
         .join(" / ");

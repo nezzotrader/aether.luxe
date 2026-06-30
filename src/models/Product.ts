@@ -1,4 +1,12 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, deleteModel, model, models } from "mongoose";
+
+const ProductCustomOptionSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    values: [{ type: String, required: true, trim: true }],
+  },
+  { _id: false },
+);
 
 const ProductSchema = new Schema(
   {
@@ -11,6 +19,7 @@ const ProductSchema = new Schema(
     images: [{ type: String, required: true }],
     colors: [{ type: String, trim: true }],
     sizes: [{ type: String, trim: true }],
+    customOptions: { type: [ProductCustomOptionSchema], default: [] },
     isActive: { type: Boolean, default: true },
   },
   {
@@ -24,5 +33,9 @@ ProductSchema.index({
   productCode: "text",
 });
 ProductSchema.index({ brand: 1, category: 1, createdAt: -1 });
+
+if (models.Product && !models.Product.schema.path("customOptions")) {
+  deleteModel("Product");
+}
 
 export const ProductModel = models.Product || model("Product", ProductSchema);

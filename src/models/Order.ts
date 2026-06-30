@@ -1,5 +1,13 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, deleteModel, model, models } from "mongoose";
 import { SHIPPING_COUNTRIES } from "@/lib/constants";
+
+const SelectedOptionSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    value: { type: String, required: true, trim: true },
+  },
+  { _id: false },
+);
 
 const OrderItemSchema = new Schema(
   {
@@ -12,6 +20,7 @@ const OrderItemSchema = new Schema(
     productCode: { type: String, required: true },
     color: { type: String, trim: true },
     size: { type: String, trim: true },
+    options: { type: [SelectedOptionSchema], default: [] },
     quantity: { type: Number, required: true, min: 1 },
   },
   { _id: false },
@@ -57,5 +66,12 @@ const OrderSchema = new Schema(
 
 OrderSchema.index({ createdAt: -1 });
 OrderSchema.index({ paymentStatus: 1 });
+
+if (
+  models.Order &&
+  !models.Order.schema.path("items")?.schema?.path("options")
+) {
+  deleteModel("Order");
+}
 
 export const OrderModel = models.Order || model("Order", OrderSchema);
