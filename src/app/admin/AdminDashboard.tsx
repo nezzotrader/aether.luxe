@@ -657,7 +657,101 @@ export function AdminDashboard({
                   Add Product
                 </button>
               </div>
-              <div className="overflow-x-auto">
+              <div className="grid gap-3 p-3 md:hidden">
+                {products.map((product) => (
+                  <article
+                    key={product._id}
+                    className="rounded-lg border border-white/10 bg-black/20 p-3"
+                  >
+                    <div className="grid grid-cols-[74px_minmax(0,1fr)] gap-3">
+                      <div className="relative aspect-square overflow-hidden rounded-md bg-[#1b1011]">
+                        <Image
+                          src={product.images[0] || "/swan.svg"}
+                          alt={product.name}
+                          fill
+                          sizes="74px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="line-clamp-2 text-sm font-semibold leading-snug text-white">
+                              {product.name}
+                            </p>
+                            <p className="mt-1 text-[11px] uppercase tracking-[0.12em] text-white/35">
+                              SKU: {product.productCode}
+                            </p>
+                          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-1 text-[10px] ${
+                              product.isActive
+                                ? "bg-green-500/15 text-green-200"
+                                : "bg-red-500/15 text-red-200"
+                            }`}
+                          >
+                            {product.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </div>
+
+                        <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/55">
+                          <span className="truncate">{product.brand}</span>
+                          <span className="truncate">{product.category}</span>
+                          <span className="font-semibold text-white/80">
+                            {formatPrice(product.price)}
+                          </span>
+                        </div>
+
+                        {product.colors?.length ||
+                        product.sizes?.length ||
+                        product.customOptions?.length ? (
+                          <p className="mt-2 line-clamp-2 text-[11px] leading-4 text-white/35">
+                            {[
+                              product.colors?.length
+                                ? `Colour / Design: ${joinOptions(product.colors)}`
+                                : "",
+                              product.sizes?.length
+                                ? `Sizes: ${joinOptions(product.sizes)}`
+                                : "",
+                              product.customOptions?.length
+                                ? product.customOptions
+                                    .map(
+                                      (option) =>
+                                        `${option.name}: ${joinOptions(option.values)}`,
+                                    )
+                                    .join(" / ")
+                                : "",
+                            ]
+                              .filter(Boolean)
+                              .join(" / ")}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => editProduct(product)}
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 text-xs font-semibold text-white/75"
+                      >
+                        <Pencil className="size-4" />
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteProduct(product._id)}
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 text-xs font-semibold text-white/75"
+                      >
+                        <Trash2 className="size-4" />
+                        Delete
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto md:block">
                 <table className="w-full min-w-[760px] text-left text-sm">
                   <thead className="text-xs uppercase tracking-[0.18em] text-white/40">
                     <tr>
