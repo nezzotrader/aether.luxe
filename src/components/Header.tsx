@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Search, ShieldUser, UserRound } from "lucide-react";
+import { Search, UserRound } from "lucide-react";
+import { AdminLink } from "./AdminLink";
 import { CartLink } from "./CartLink";
 import { MobileMenu } from "./MobileMenu";
 
@@ -43,13 +44,7 @@ export function Header({ search = "", showSearch = true }: HeaderProps) {
               <UserRound className="size-4" aria-hidden="true" />
               <span className="hidden md:inline">Profile</span>
             </Link>
-            <Link
-              href="/admin"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/80 transition hover:border-white/35 hover:text-white md:px-3"
-            >
-              <ShieldUser className="size-4" aria-hidden="true" />
-              <span className="hidden md:inline">Admin</span>
-            </Link>
+            <AdminLink />
           </div>
         </div>
 
@@ -84,13 +79,7 @@ export function Header({ search = "", showSearch = true }: HeaderProps) {
               <UserRound className="size-4" aria-hidden="true" />
               <span className="hidden md:inline">Profile</span>
             </Link>
-            <Link
-              href="/admin"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/15 px-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/80 transition hover:border-white/35 hover:text-white md:px-3"
-            >
-              <ShieldUser className="size-4" aria-hidden="true" />
-              <span className="hidden md:inline">Admin</span>
-            </Link>
+            <AdminLink />
           </div>
         </div>
 

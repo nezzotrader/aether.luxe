@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Heart } from "lucide-react";
 import { ProductImageCarousel } from "./ProductImageCarousel";
+import { formatPrice } from "@/lib/format";
 import type { Product } from "@/types/product";
 
 type ProductCardProps = {
@@ -17,13 +17,6 @@ export function ProductCard({ product }: ProductCardProps) {
             name={product.name}
             quality={95}
           />
-          <button
-            type="button"
-            className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur transition hover:bg-black/70 sm:right-3 sm:top-3 sm:size-9"
-            aria-label="Save item"
-          >
-            <Heart className="size-4" aria-hidden="true" />
-          </button>
         </div>
       </Link>
 
@@ -43,6 +36,9 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.soldCount} sold
             </p>
           ) : null}
+          <p className="mt-3 text-sm font-semibold text-[#d7d7d7]">
+            {formatPrice(product.price)}
+          </p>
         </div>
       </div>
     </article>

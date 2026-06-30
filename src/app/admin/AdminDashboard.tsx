@@ -636,13 +636,7 @@ export function AdminDashboard({
         ) : null}
 
         {tab === "products" ? (
-          <div
-            className={
-              productFormMode
-                ? "grid gap-6 xl:grid-cols-[minmax(0,1fr)_460px]"
-                : "grid gap-6"
-            }
-          >
+          <div className="grid gap-6">
             <div className="rounded-lg border border-white/10 bg-[#120407]">
               <div className="flex items-center justify-between border-b border-white/10 p-4">
                 <p className="text-sm text-white/60">
@@ -810,7 +804,7 @@ export function AdminDashboard({
             </div>
 
             {productFormMode ? (
-            <form onSubmit={saveProduct} className="rounded-lg border border-white/10 bg-[#120407] p-5 shadow-2xl shadow-black/30">
+            <form onSubmit={saveProduct} className="order-first rounded-lg border border-white/10 bg-[#120407] p-5 shadow-2xl shadow-black/30">
               <div className="mb-5 flex items-center justify-between">
                 <h2 className="font-display text-3xl font-semibold text-white">
                   {editingProductId ? "Edit Product" : "Add Product"}
