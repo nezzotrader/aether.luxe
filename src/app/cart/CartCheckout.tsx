@@ -27,6 +27,19 @@ export function CartCheckout() {
   const shippingFee = SHIPPING_OPTIONS[shippingCountry];
   const effectiveDiscount = appliedPromo === "FREESHIP" ? shippingFee : discount;
   const grandTotal = Math.max(subtotal + shippingFee - effectiveDiscount, 0);
+  const paymentBadges = (
+    <span className="inline-flex items-center gap-1" aria-label="Apple Pay, Visa, and Google Pay supported">
+      <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-bold text-black">
+        Pay
+      </span>
+      <span className="rounded bg-[#1434cb] px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white">
+        VISA
+      </span>
+      <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-bold text-black">
+        G Pay
+      </span>
+    </span>
+  );
 
   useEffect(() => {
     fetch("/api/store-config", { cache: "no-store" })
@@ -340,7 +353,7 @@ export function CartCheckout() {
               }`}
             >
               <CreditCard className="size-4" aria-hidden="true" />
-              Stripe
+              {paymentBadges}
             </button>
           </div>
 
@@ -398,9 +411,18 @@ export function CartCheckout() {
           <button
             type="submit"
             disabled={!canCheckout || loading}
-            className="h-12 w-full rounded-md bg-[#7f1730] px-5 text-sm font-semibold text-white transition hover:bg-[#9a1d3a] disabled:opacity-55"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-[#7f1730] px-5 text-sm font-semibold text-white transition hover:bg-[#9a1d3a] disabled:opacity-55"
           >
-            {loading ? "Processing..." : paymentMethod === "stripe" ? "Pay with Stripe" : "Submit QR Order"}
+            {loading ? (
+              "Processing..."
+            ) : paymentMethod === "stripe" ? (
+              <>
+                Pay with Stripe
+                {paymentBadges}
+              </>
+            ) : (
+              "Submit QR Order"
+            )}
           </button>
         </form>
       </aside>

@@ -18,6 +18,10 @@ type CartContextValue = {
     product: Product,
     selection?: { color?: string; size?: string },
   ) => void;
+  buyNow: (
+    product: Product,
+    selection?: { color?: string; size?: string },
+  ) => void;
   updateQuantity: (cartItemId: string, quantity: number) => void;
   removeItem: (cartItemId: string) => void;
   clearCart: () => void;
@@ -107,6 +111,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
           return [...current, nextItem];
         });
+      },
+      buyNow(product, selection) {
+        const nextItem = toCartItem(product, selection);
+        setItems([nextItem]);
+        window.localStorage.setItem("aether-cart", JSON.stringify([nextItem]));
+        window.location.href = "/cart";
       },
       updateQuantity(cartItemId, quantity) {
         setItems((current) =>

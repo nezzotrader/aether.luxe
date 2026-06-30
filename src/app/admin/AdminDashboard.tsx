@@ -1045,6 +1045,10 @@ export function AdminDashboard({
                       <button type="button" onClick={() => updateOrder(order._id, "rejected")} className="h-10 rounded-md bg-red-800 px-3 text-sm font-semibold text-white">Reject</button>
                     </>
                   ) : null}
+                  {order.paymentMethod === "stripe" &&
+                  order.paymentStatus !== "confirmed" ? (
+                    <button type="button" onClick={() => updateOrder(order._id, "rejected")} className="h-10 rounded-md bg-red-900 px-3 text-sm font-semibold text-white">Delete order</button>
+                  ) : null}
                   {order.paymentStatus === "confirmed" ? (
                     <>
                       <a href={`/invoice/${order._id}`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center rounded-md border border-white/10 px-3 text-sm text-white/75">Invoice</a>

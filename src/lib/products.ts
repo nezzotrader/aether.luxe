@@ -1,5 +1,6 @@
 import { PRODUCTS_PER_PAGE } from "./constants";
 import { connectToDatabase, hasDatabaseConfig } from "./db";
+import { OrderModel } from "@/models/Order";
 import { ProductModel } from "@/models/Product";
 import type { Product } from "@/types/product";
 
@@ -14,6 +15,7 @@ type ProductDocument = {
   images: string[];
   colors?: string[];
   sizes?: string[];
+  soldCount?: number;
   isActive?: boolean;
   createdAt: Date;
 };
@@ -28,7 +30,10 @@ export type ProductQuery = {
   activeOnly?: boolean;
 };
 
-export function serializeProduct(product: ProductDocument): Product {
+export function serializeProduct(
+  product: ProductDocument,
+  soldCount = product.soldCount || 0,
+): Product {
   return {
     _id: product._id.toString(),
     name: product.name,
@@ -40,9 +45,33 @@ export function serializeProduct(product: ProductDocument): Product {
     images: product.images,
     colors: product.colors || [],
     sizes: product.sizes || [],
+    soldCount,
     isActive: product.isActive ?? true,
     createdAt: product.createdAt.toISOString(),
   };
+}
+
+async function getSoldCounts(productIds: string[]) {
+  if (!productIds.length) {
+    return new Map<string, number>();
+  }
+
+  const rows = await OrderModel.aggregate<{
+    _id: string;
+    soldCount: number;
+  }>([
+    { $match: { paymentStatus: "confirmed" } },
+    { $unwind: "$items" },
+    { $match: { "items.productId": { $in: productIds } } },
+    {
+      $group: {
+        _id: "$items.productId",
+        soldCount: { $sum: "$items.quantity" },
+      },
+    },
+  ]);
+
+  return new Map(rows.map((row) => [row._id, row.soldCount]));
 }
 
 function getSort(sort?: string): Record<string, 1 | -1> {
@@ -104,8 +133,13 @@ export async function getProducts(query: ProductQuery = {}) {
     ProductModel.countDocuments(filter),
   ]);
 
+  const productIds = items.map((item) => item._id.toString());
+  const soldCounts = await getSoldCounts(productIds);
+
   return {
-    products: items.map(serializeProduct),
+    products: items.map((item) =>
+      serializeProduct(item, soldCounts.get(item._id.toString()) || 0),
+    ),
     total,
     page,
     pages: Math.max(Math.ceil(total / perPage), 1),
@@ -119,5 +153,10 @@ export async function getProductById(id: string) {
 
   await connectToDatabase();
   const product = await ProductModel.findById(id).lean<ProductDocument | null>();
-  return product ? serializeProduct(product) : null;
+  if (!product) {
+    return null;
+  }
+
+  const soldCounts = await getSoldCounts([product._id.toString()]);
+  return serializeProduct(product, soldCounts.get(product._id.toString()) || 0);
 }

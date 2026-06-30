@@ -27,3 +27,5 @@
  GET / 200 in 687ms (next.js: 232ms, application-code: 454ms)
  GET /products/6a43083fb0c79832c1e4655a 200 in 2.3s
 ✓ Compiled in 206ms
+✓ Compiled in 519ms
+✓ Compiled in 98ms

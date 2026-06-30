@@ -11,6 +11,7 @@ export type Product = {
   images: string[];
   colors?: string[];
   sizes?: string[];
+  soldCount?: number;
   isActive: boolean;
   createdAt: string;
 };

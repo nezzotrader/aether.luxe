@@ -42,6 +42,11 @@ export function ProductCard({ product }: ProductCardProps) {
           >
             {product.name}
           </Link>
+          {product.soldCount ? (
+            <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-white/35">
+              {product.soldCount} sold
+            </p>
+          ) : null}
         </div>
 
         <div className="flex items-center justify-between gap-2 sm:gap-3">

@@ -11,7 +11,7 @@ type AddToCartButtonProps = {
 };
 
 export function AddToCartButton({ product, compact = false }: AddToCartButtonProps) {
-  const { addProduct } = useCart();
+  const { addProduct, buyNow } = useCart();
   const [added, setAdded] = useState(false);
   const [color, setColor] = useState(product.colors?.[0] || "");
   const [size, setSize] = useState(product.sizes?.[0] || "");
@@ -20,6 +20,10 @@ export function AddToCartButton({ product, compact = false }: AddToCartButtonPro
     addProduct(product, { color, size });
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1200);
+  }
+
+  function handleBuyNow() {
+    buyNow(product, { color, size });
   }
 
   if (!compact && (product.colors?.length || product.sizes?.length)) {
@@ -63,32 +67,59 @@ export function AddToCartButton({ product, compact = false }: AddToCartButtonPro
             </label>
           ) : null}
         </div>
-        <button
-          type="button"
-          onClick={handleClick}
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-semibold text-black transition hover:bg-[#d9d9d9]"
-        >
-          <ShoppingBag className="size-4" aria-hidden="true" />
-          {added ? "Added" : "Add to cart"}
-        </button>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={handleClick}
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-semibold text-black transition hover:bg-[#d9d9d9]"
+          >
+            <ShoppingBag className="size-4" aria-hidden="true" />
+            {added ? "Added" : "Add to cart"}
+          </button>
+          <button
+            type="button"
+            onClick={handleBuyNow}
+            className="inline-flex h-12 w-full items-center justify-center rounded-md bg-[#7f1730] px-5 text-sm font-semibold text-white transition hover:bg-[#9a1d3a]"
+          >
+            Buy Now
+          </button>
+        </div>
       </div>
     );
   }
 
+  if (compact) {
+    return (
+      <button
+        type="button"
+        onClick={handleClick}
+        className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-white px-3 text-xs font-semibold text-black transition hover:bg-[#d9d9d9]"
+      >
+        <ShoppingBag className="size-4" aria-hidden="true" />
+        <span className="hidden min-[390px]:inline">
+          {added ? "Added" : "Add to cart"}
+        </span>
+      </button>
+    );
+  }
+
   return (
+    <div className="grid gap-3 sm:grid-cols-2">
     <button
       type="button"
       onClick={handleClick}
-      className={
-        compact
-          ? "inline-flex h-10 items-center justify-center gap-2 rounded-md bg-white px-3 text-xs font-semibold text-black transition hover:bg-[#d9d9d9]"
-          : "inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-semibold text-black transition hover:bg-[#d9d9d9]"
-      }
+      className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-semibold text-black transition hover:bg-[#d9d9d9]"
     >
       <ShoppingBag className="size-4" aria-hidden="true" />
-      <span className={compact ? "hidden min-[390px]:inline" : ""}>
-        {added ? "Added" : "Add to cart"}
-      </span>
+      {added ? "Added" : "Add to cart"}
     </button>
+      <button
+        type="button"
+        onClick={handleBuyNow}
+        className="inline-flex h-12 w-full items-center justify-center rounded-md bg-[#7f1730] px-5 text-sm font-semibold text-white transition hover:bg-[#9a1d3a]"
+      >
+        Buy Now
+      </button>
+    </div>
   );
 }

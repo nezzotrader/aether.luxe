@@ -53,6 +53,11 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
             <p className="mt-5 text-2xl font-semibold text-[#d8d8d8]">
               {formatPrice(product.price)}
             </p>
+            {product.soldCount ? (
+              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-white/40">
+                {product.soldCount} sold
+              </p>
+            ) : null}
 
             <dl className="mt-8 grid grid-cols-2 gap-3 border-y border-white/10 py-6 text-sm">
               <div>
@@ -97,7 +102,7 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
               {product.description}
             </p>
 
-            <div className="mt-10 grid gap-3 sm:grid-cols-2">
+            <div className="mt-10 space-y-3">
               <AddToCartButton product={product} />
               <Link
                 href="/cart"
