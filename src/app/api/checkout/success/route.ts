@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { sendInvoiceEmail } from "@/lib/emailjs";
+import { sendInvoiceEmail } from "@/lib/resend";
 import { serializeOrder } from "@/lib/orders";
 import { getStripe } from "@/lib/stripe";
 import { OrderModel } from "@/models/Order";

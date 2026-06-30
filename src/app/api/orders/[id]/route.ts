@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { serializeOrder } from "@/lib/orders";
-import { sendInvoiceEmail } from "@/lib/emailjs";
+import { sendInvoiceEmail } from "@/lib/resend";
 import { orderStatusSchema } from "@/lib/validators";
 import { OrderModel } from "@/models/Order";
 

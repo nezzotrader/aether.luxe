@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
-import { sendInvoiceEmail } from "@/lib/emailjs";
+import { sendInvoiceEmail } from "@/lib/resend";
 import { getOrderById } from "@/lib/orders";
 import { OrderModel } from "@/models/Order";
 

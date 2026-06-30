@@ -64,3 +64,37 @@
  GET /admin 200 in 395ms (next.js: 132ms, application-code: 263ms)
  GET /admin 200 in 226ms (next.js: 28ms, application-code: 198ms)
  GET /admin 200 in 209ms (next.js: 30ms, application-code: 179ms)
+ GET /api/auth/session 200 in 115ms (next.js: 80ms, application-code: 35ms)
+ GET /api/auth/session 200 in 37ms (next.js: 19ms, application-code: 17ms)
+ GET /api/auth/session 200 in 49ms (next.js: 17ms, application-code: 33ms)
+ GET / 200 in 298ms (next.js: 18ms, application-code: 280ms)
+ GET /about 200 in 49ms (next.js: 21ms, application-code: 29ms)
+ GET /admin 200 in 184ms (next.js: 4ms, application-code: 180ms)
+ GET /api/auth/session 200 in 47ms (next.js: 12ms, application-code: 35ms)
+ GET /api/auth/session 200 in 43ms (next.js: 4ms, application-code: 39ms)
+ PUT /api/promos/6a421d96602298d3a488cf22 200 in 1781ms (next.js: 1689ms, application-code: 93ms)
+ GET /api/promos 200 in 464ms (next.js: 295ms, application-code: 169ms)
+ GET /admin 200 in 686ms (next.js: 60ms, application-code: 626ms)
+ GET /admin 200 in 919ms (next.js: 121ms, application-code: 798ms)
+ GET /admin 200 in 919ms (next.js: 25ms, application-code: 894ms)
+ GET /admin 200 in 919ms (next.js: 99ms, application-code: 820ms)
+ GET /admin 200 in 924ms (next.js: 146ms, application-code: 778ms)
+ GET /admin 200 in 1114ms (next.js: 63ms, application-code: 1052ms)
+  Reload env: .env.local
+✓ Compiled in 135ms
+ GET /admin 200 in 610ms (next.js: 129ms, application-code: 481ms)
+ GET /admin 200 in 543ms (next.js: 29ms, application-code: 515ms)
+ GET /admin 200 in 432ms (next.js: 60ms, application-code: 372ms)
+ GET /admin 200 in 434ms (next.js: 23ms, application-code: 411ms)
+ GET /admin 200 in 449ms (next.js: 155ms, application-code: 295ms)
+ GET /admin 200 in 680ms (next.js: 108ms, application-code: 572ms)
+  Reload env: .env.local
+ GET /admin 200 in 478ms (next.js: 168ms, application-code: 311ms)
+  Reload env: .env.local
+ GET /admin 200 in 401ms (next.js: 149ms, application-code: 253ms)
+  Reload env: .env.local
+ GET /admin 200 in 337ms (next.js: 139ms, application-code: 198ms)
+  Reload env: .env.local
+ GET /admin 200 in 358ms (next.js: 121ms, application-code: 237ms)
+  Reload env: .env.local
+ GET /admin 200 in 355ms (next.js: 148ms, application-code: 207ms)

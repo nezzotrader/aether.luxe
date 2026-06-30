@@ -53,10 +53,9 @@ CLOUDINARY_API_SECRET=your_api_secret
 NEXT_PUBLIC_QR_PAYMENT_IMAGE_URL=https://res.cloudinary.com/your-cloud/image/upload/your-payment-qr.png
 STRIPE_SECRET_KEY=sk_test_replace_me
 
-EMAILJS_SERVICE_ID=service_xxxxx
-EMAILJS_TEMPLATE_ID=template_xxxxx
-EMAILJS_PUBLIC_KEY=your_emailjs_public_key
-EMAILJS_PRIVATE_KEY=optional_private_key_xxxxx
+RESEND_API_KEY=re_xxxxxxxxx
+RESEND_FROM_EMAIL=Aether Luxe <invoice@yourdomain.com>
+RESEND_REPLY_TO=owner@example.com
 ```
 
 Generate a secure NextAuth secret:
@@ -73,9 +72,9 @@ node -e "const bcrypt=require('bcryptjs'); bcrypt.hash('your-password-here', 10)
 
 The admin email and password are never hardcoded in source code. Authentication reads `ADMIN_EMAIL` plus either `ADMIN_PASSWORD` or `ADMIN_PASSWORD_HASH` from the environment. Use `ADMIN_PASSWORD` only for local convenience; keep `ADMIN_PASSWORD_HASH` for production.
 
-EmailJS invoices use these template variables: `email`, `to_email`, `to_name`, `invoice_url`, `invoice_number`, `order_total`, `order_subtotal`, `shipping_fee`, `shipping_country`, `discount`, `promo_code`, `order_items`, `shipping_address`, and `shipping_addess`.
+Invoice emails are sent with Resend. `RESEND_API_KEY` must be a server-only API key from Resend, and `RESEND_FROM_EMAIL` must use a verified Resend sending domain, for example `Aether Luxe <invoice@aetherluxury.xyz>`. `RESEND_REPLY_TO` is optional and can point to your admin email.
 
-If EmailJS returns `Account not found`, check that `EMAILJS_PUBLIC_KEY` is the Public Key from EmailJS Account settings, not your `service_...` ID.
+Remove these old EmailJS variables from local and Vercel because they are no longer used: `EMAILJS_SERVICE_ID`, `EMAILJS_TEMPLATE_ID`, `EMAILJS_PUBLIC_KEY`, `NEXT_PUBLIC_EMAILJS_PUBLIC_KEY`, `EMAILJS_USER_ID`, `EMAILJS_PRIVATE_KEY`, `EMAILJS_ACCESS_TOKEN`, and `EMAILJS_PRIVATE_TOKEN`.
 
 ## Product Schema
 
