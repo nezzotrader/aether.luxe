@@ -93,7 +93,7 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
               ) : null}
             </dl>
 
-            <p className="mt-7 text-base leading-7 text-white/62">
+            <p className="mt-7 whitespace-pre-line text-base leading-7 text-white/62">
               {product.description}
             </p>
 
