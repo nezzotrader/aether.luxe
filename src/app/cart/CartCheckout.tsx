@@ -18,6 +18,7 @@ export function CartCheckout() {
   const [discount, setDiscount] = useState(0);
   const [receiptUrl, setReceiptUrl] = useState("");
   const [qrImage, setQrImage] = useState("");
+  const [qrLoadError, setQrLoadError] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const canCheckout = useMemo(() => items.length > 0, [items]);
@@ -27,7 +28,10 @@ export function CartCheckout() {
   useEffect(() => {
     fetch("/api/store-config", { cache: "no-store" })
       .then((response) => response.json())
-      .then((data) => setQrImage(data.qrPaymentImageUrl || ""))
+      .then((data) => {
+        setQrImage(data.qrPaymentImageUrl || "");
+        setQrLoadError(false);
+      })
       .catch(() => setQrImage(""));
   }, []);
 
@@ -324,8 +328,32 @@ export function CartCheckout() {
           {paymentMethod === "qr" ? (
             <div className="rounded-md border border-white/10 bg-black/20 p-4">
               {qrImage ? (
-                <div className="relative mx-auto aspect-square w-44 overflow-hidden rounded-md bg-white">
-                  <Image src={qrImage} alt="Payment QR code" fill sizes="176px" className="object-contain" />
+                <div className="mx-auto w-52">
+                  <div className="grid aspect-square place-items-center overflow-hidden rounded-md bg-white p-2">
+                    <Image
+                      src={qrImage}
+                      alt="Payment QR code"
+                      width={240}
+                      height={240}
+                      unoptimized
+                      className="h-full w-full object-contain"
+                      onLoad={() => setQrLoadError(false)}
+                      onError={() => setQrLoadError(true)}
+                    />
+                  </div>
+                  <a
+                    href={qrImage}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 block text-center text-xs text-white/50 underline"
+                  >
+                    Open QR image
+                  </a>
+                  {qrLoadError ? (
+                    <p className="mt-2 text-center text-xs leading-5 text-red-200">
+                      QR image could not load. Check the Cloudinary URL in your environment variable.
+                    </p>
+                  ) : null}
                 </div>
               ) : (
                 <p className="text-sm leading-6 text-white/55">
