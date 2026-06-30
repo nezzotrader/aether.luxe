@@ -160,7 +160,7 @@ export function CartCheckout() {
     setDiscount(0);
     setAppliedPromo("");
     setPromoInput("");
-    setMessage("Order submitted. Admin will confirm your receipt soon.");
+    window.location.href = `/checkout/success?method=qr&order_id=${data.order?._id || ""}`;
   }
 
   return (

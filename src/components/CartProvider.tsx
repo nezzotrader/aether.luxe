@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -113,6 +114,61 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     window.localStorage.setItem("aether-cart", JSON.stringify(items));
   }, [items]);
 
+  const addProduct = useCallback<CartContextValue["addProduct"]>(
+    (product, selection) => {
+      setItems((current) => {
+        const nextItem = toCartItem(product, selection);
+        const existing = current.find(
+          (item) => item.cartItemId === nextItem.cartItemId,
+        );
+
+        if (existing) {
+          return current.map((item) =>
+            item.cartItemId === nextItem.cartItemId
+              ? { ...item, quantity: item.quantity + 1 }
+              : item,
+          );
+        }
+
+        return [...current, nextItem];
+      });
+    },
+    [],
+  );
+
+  const buyNow = useCallback<CartContextValue["buyNow"]>((product, selection) => {
+    const nextItem = toCartItem(product, selection);
+    setItems([nextItem]);
+    window.localStorage.setItem("aether-cart", JSON.stringify([nextItem]));
+    window.location.href = "/cart";
+  }, []);
+
+  const updateQuantity = useCallback<CartContextValue["updateQuantity"]>(
+    (cartItemId, quantity) => {
+      setItems((current) =>
+        current
+          .map((item) =>
+            item.cartItemId === cartItemId
+              ? { ...item, quantity: Math.max(quantity, 1) }
+              : item,
+          )
+          .filter((item) => item.quantity > 0),
+      );
+    },
+    [],
+  );
+
+  const removeItem = useCallback<CartContextValue["removeItem"]>((cartItemId) => {
+    setItems((current) =>
+      current.filter((item) => item.cartItemId !== cartItemId),
+    );
+  }, []);
+
+  const clearCart = useCallback(() => {
+    setItems([]);
+    window.localStorage.setItem("aether-cart", JSON.stringify([]));
+  }, []);
+
   const value = useMemo<CartContextValue>(() => {
     const count = items.reduce((sum, item) => sum + item.quantity, 0);
     const total = items.reduce(
@@ -124,51 +180,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       items,
       count,
       total,
-      addProduct(product, selection) {
-        setItems((current) => {
-          const nextItem = toCartItem(product, selection);
-          const existing = current.find(
-            (item) => item.cartItemId === nextItem.cartItemId,
-          );
-
-          if (existing) {
-            return current.map((item) =>
-              item.cartItemId === nextItem.cartItemId
-                ? { ...item, quantity: item.quantity + 1 }
-                : item,
-            );
-          }
-
-          return [...current, nextItem];
-        });
-      },
-      buyNow(product, selection) {
-        const nextItem = toCartItem(product, selection);
-        setItems([nextItem]);
-        window.localStorage.setItem("aether-cart", JSON.stringify([nextItem]));
-        window.location.href = "/cart";
-      },
-      updateQuantity(cartItemId, quantity) {
-        setItems((current) =>
-          current
-            .map((item) =>
-              item.cartItemId === cartItemId
-                ? { ...item, quantity: Math.max(quantity, 1) }
-                : item,
-            )
-            .filter((item) => item.quantity > 0),
-        );
-      },
-      removeItem(cartItemId) {
-        setItems((current) =>
-          current.filter((item) => item.cartItemId !== cartItemId),
-        );
-      },
-      clearCart() {
-        setItems([]);
-      },
+      addProduct,
+      buyNow,
+      updateQuantity,
+      removeItem,
+      clearCart,
     };
-  }, [items]);
+  }, [addProduct, buyNow, clearCart, items, removeItem, updateQuantity]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
