@@ -86,6 +86,7 @@ export function AdminDashboard({
     isActive: true,
     oneUsePerEmail: false,
   });
+  const [productFormMode, setProductFormMode] = useState<"add" | "edit" | null>(null);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
   const [editingPromoId, setEditingPromoId] = useState<string | null>(null);
@@ -132,11 +133,23 @@ export function AdminDashboard({
 
   function resetProductForm() {
     setEditingProductId(null);
+    setProductFormMode(null);
     setProductForm(makeEmptyProduct(brands[0]?.name || ""));
     setProductColorInput("");
     setProductSizeInput("");
     setProductCustomOptionName("");
     setProductCustomOptionValues("");
+  }
+
+  function addProduct() {
+    setEditingProductId(null);
+    setProductFormMode("add");
+    setProductForm(makeEmptyProduct(brands[0]?.name || ""));
+    setProductColorInput("");
+    setProductSizeInput("");
+    setProductCustomOptionName("");
+    setProductCustomOptionValues("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function resetBrandForm() {
@@ -219,6 +232,7 @@ export function AdminDashboard({
   function editProduct(product: Product) {
     setTab("products");
     setEditingProductId(product._id);
+    setProductFormMode("edit");
     setProductForm({
       name: product.name,
       brand: product.brand,
@@ -622,12 +636,26 @@ export function AdminDashboard({
         ) : null}
 
         {tab === "products" ? (
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+          <div
+            className={
+              productFormMode
+                ? "grid gap-6 xl:grid-cols-[minmax(0,1fr)_460px]"
+                : "grid gap-6"
+            }
+          >
             <div className="rounded-lg border border-white/10 bg-[#120407]">
               <div className="flex items-center justify-between border-b border-white/10 p-4">
                 <p className="text-sm text-white/60">
                   {activeProducts} active / {products.length} total
                 </p>
+                <button
+                  type="button"
+                  onClick={addProduct}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-white px-4 text-xs font-semibold uppercase tracking-[0.12em] text-black transition hover:bg-[#d9d9d9]"
+                >
+                  <Plus className="size-4" aria-hidden="true" />
+                  Add Product
+                </button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-left text-sm">
@@ -687,16 +715,15 @@ export function AdminDashboard({
               </div>
             </div>
 
-            <form onSubmit={saveProduct} className="rounded-lg border border-white/10 bg-[#120407] p-5">
+            {productFormMode ? (
+            <form onSubmit={saveProduct} className="rounded-lg border border-white/10 bg-[#120407] p-5 shadow-2xl shadow-black/30">
               <div className="mb-5 flex items-center justify-between">
                 <h2 className="font-display text-3xl font-semibold text-white">
                   {editingProductId ? "Edit Product" : "Add Product"}
                 </h2>
-                {editingProductId ? (
-                  <button type="button" onClick={resetProductForm} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/65">
-                    <X className="size-4" />
-                  </button>
-                ) : null}
+                <button type="button" onClick={resetProductForm} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/65">
+                  <X className="size-4" />
+                </button>
               </div>
 
               <div className="space-y-3">
@@ -791,18 +818,18 @@ export function AdminDashboard({
                       <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/45">
                         Custom option
                       </p>
-                      <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                      <div className="grid gap-2">
                         <input
                           value={productCustomOptionName}
                           onChange={(event) => setProductCustomOptionName(event.target.value)}
                           placeholder="Option name e.g. Heel Height"
-                          className="h-10 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white placeholder:text-white/35"
+                          className="h-10 min-w-0 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white placeholder:text-white/35"
                         />
                         <input
                           value={productCustomOptionValues}
                           onChange={(event) => setProductCustomOptionValues(event.target.value)}
                           placeholder="Values e.g. 8cm, 10cm"
-                          className="h-10 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white placeholder:text-white/35"
+                          className="h-10 min-w-0 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white placeholder:text-white/35"
                         />
                         <button
                           type="button"
@@ -883,6 +910,7 @@ export function AdminDashboard({
                 {saving ? "Saving..." : "Save Product"}
               </button>
             </form>
+            ) : null}
           </div>
         ) : null}
 

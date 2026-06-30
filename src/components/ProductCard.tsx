@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { Heart } from "lucide-react";
-import { AddToCartButton } from "./AddToCartButton";
 import { ProductImageCarousel } from "./ProductImageCarousel";
-import { formatPrice } from "@/lib/format";
 import type { Product } from "@/types/product";
 
 type ProductCardProps = {
@@ -10,12 +8,6 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product }: ProductCardProps) {
-  const hasOptions = Boolean(
-    product.colors?.length ||
-      product.sizes?.length ||
-      product.customOptions?.length,
-  );
-
   return (
     <article className="group overflow-hidden rounded-lg border border-white/10 bg-[#160409] transition hover:border-white/25">
       <Link href={`/products/${product._id}`} className="block">
@@ -51,22 +43,6 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.soldCount} sold
             </p>
           ) : null}
-        </div>
-
-        <div className="flex items-center justify-between gap-2 sm:gap-3">
-          <p className="text-sm font-semibold text-[#d7d7d7]">
-            {formatPrice(product.price)}
-          </p>
-          {hasOptions ? (
-            <Link
-              href={`/products/${product._id}`}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-white px-3 text-xs font-semibold text-black transition hover:bg-[#d9d9d9]"
-            >
-              Options
-            </Link>
-          ) : (
-            <AddToCartButton product={product} compact />
-          )}
         </div>
       </div>
     </article>
