@@ -98,7 +98,11 @@ export function CartCheckout() {
       customerName: formData.get("customerName"),
       customerEmail: formData.get("customerEmail"),
       customerPhone: formData.get("customerPhone"),
-      shippingAddress: formData.get("shippingAddress"),
+      shippingAddressLine1: formData.get("shippingAddressLine1"),
+      shippingAddressLine2: formData.get("shippingAddressLine2"),
+      shippingPostcode: formData.get("shippingPostcode"),
+      shippingCity: formData.get("shippingCity"),
+      shippingState: formData.get("shippingState"),
       shippingCountry,
       paymentMethod,
       promoCode: appliedPromo || promoInput || undefined,
@@ -223,7 +227,18 @@ export function CartCheckout() {
           <input name="customerName" required placeholder="Full name" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
           <input name="customerEmail" required type="email" placeholder="Email" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
           <input name="customerPhone" required placeholder="Phone number" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
-          <textarea name="shippingAddress" required rows={4} placeholder="Delivery address" className="w-full rounded-md border border-white/10 bg-[#1a060b] px-3 py-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
+          <div className="space-y-3 rounded-md border border-white/10 bg-black/20 p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/45">
+              Delivery address
+            </p>
+            <input name="shippingAddressLine1" required placeholder="Address line 1" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
+            <input name="shippingAddressLine2" placeholder="Address line 2 / apartment / unit (optional)" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
+            <div className="grid grid-cols-2 gap-3">
+              <input name="shippingPostcode" required placeholder="Postcode" className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
+              <input name="shippingCity" required placeholder="City" className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
+            </div>
+            <input name="shippingState" required placeholder="State / province" className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/35" />
+          </div>
 
           <label className="block space-y-2">
             <span className="text-xs uppercase tracking-[0.22em] text-white/45">

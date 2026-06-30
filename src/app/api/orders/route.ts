@@ -10,6 +10,26 @@ import { OrderModel } from "@/models/Order";
 
 export const runtime = "nodejs";
 
+function composeShippingAddress(data: {
+  shippingAddress?: string;
+  shippingAddressLine1: string;
+  shippingAddressLine2?: string;
+  shippingPostcode: string;
+  shippingCity: string;
+  shippingState: string;
+  shippingCountry: "Malaysia" | "Singapore";
+}) {
+  return [
+    data.shippingAddressLine1,
+    data.shippingAddressLine2,
+    `${data.shippingPostcode} ${data.shippingCity}`,
+    data.shippingState,
+    data.shippingCountry,
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
 export async function GET() {
   const session = await getServerSession(authOptions);
 
@@ -53,6 +73,7 @@ export async function POST(request: Request) {
   const order = await OrderModel.create({
     ...parsed.data,
     customerEmail: parsed.data.customerEmail.toLowerCase(),
+    shippingAddress: composeShippingAddress(parsed.data),
     subtotal,
     shippingFee,
     promoCode,

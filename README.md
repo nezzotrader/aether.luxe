@@ -55,7 +55,7 @@ STRIPE_SECRET_KEY=sk_test_replace_me
 
 EMAILJS_SERVICE_ID=service_xxxxx
 EMAILJS_TEMPLATE_ID=template_xxxxx
-EMAILJS_PUBLIC_KEY=public_key_xxxxx
+EMAILJS_PUBLIC_KEY=your_emailjs_public_key
 EMAILJS_PRIVATE_KEY=optional_private_key_xxxxx
 ```
 
@@ -73,7 +73,9 @@ node -e "const bcrypt=require('bcryptjs'); bcrypt.hash('your-password-here', 10)
 
 The admin email and password are never hardcoded in source code. Authentication reads `ADMIN_EMAIL` plus either `ADMIN_PASSWORD` or `ADMIN_PASSWORD_HASH` from the environment. Use `ADMIN_PASSWORD` only for local convenience; keep `ADMIN_PASSWORD_HASH` for production.
 
-EmailJS invoices use these template variables: `to_email`, `to_name`, `invoice_url`, `invoice_number`, `order_total`, `order_subtotal`, `shipping_fee`, `shipping_country`, `discount`, `promo_code`, `order_items`, and `shipping_address`.
+EmailJS invoices use these template variables: `email`, `to_email`, `to_name`, `invoice_url`, `invoice_number`, `order_total`, `order_subtotal`, `shipping_fee`, `shipping_country`, `discount`, `promo_code`, `order_items`, `shipping_address`, and `shipping_addess`.
+
+If EmailJS returns `Account not found`, check that `EMAILJS_PUBLIC_KEY` is the Public Key from EmailJS Account settings, not your `service_...` ID.
 
 ## Product Schema
 

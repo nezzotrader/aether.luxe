@@ -6,11 +6,28 @@ type EmailJsResult = {
   message: string;
 };
 
+function emailJsConfig() {
+  return {
+    serviceId: process.env.EMAILJS_SERVICE_ID,
+    templateId: process.env.EMAILJS_TEMPLATE_ID,
+    publicKey:
+      process.env.EMAILJS_PUBLIC_KEY ||
+      process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY ||
+      process.env.EMAILJS_USER_ID,
+    privateKey:
+      process.env.EMAILJS_PRIVATE_KEY ||
+      process.env.EMAILJS_ACCESS_TOKEN ||
+      process.env.EMAILJS_PRIVATE_TOKEN,
+  };
+}
+
 function hasEmailJsConfig() {
+  const config = emailJsConfig();
+
   return Boolean(
-    process.env.EMAILJS_SERVICE_ID &&
-      process.env.EMAILJS_TEMPLATE_ID &&
-      process.env.EMAILJS_PUBLIC_KEY,
+    config.serviceId &&
+      config.templateId &&
+      config.publicKey,
   );
 }
 
@@ -32,6 +49,8 @@ export async function sendInvoiceEmail(
   order: Order,
   invoiceUrl: string,
 ): Promise<EmailJsResult> {
+  const config = emailJsConfig();
+
   if (!hasEmailJsConfig()) {
     return {
       sent: false,
@@ -44,11 +63,14 @@ export async function sendInvoiceEmail(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      service_id: process.env.EMAILJS_SERVICE_ID,
-      template_id: process.env.EMAILJS_TEMPLATE_ID,
-      user_id: process.env.EMAILJS_PUBLIC_KEY,
-      accessToken: process.env.EMAILJS_PRIVATE_KEY || undefined,
+      service_id: config.serviceId,
+      template_id: config.templateId,
+      user_id: config.publicKey,
+      accessToken: config.privateKey || undefined,
       template_params: {
+        email: order.customerEmail,
+        name: order.customerName,
+        address: order.shippingAddress,
         to_email: order.customerEmail,
         to_name: order.customerName,
         customer_email: order.customerEmail,
@@ -63,6 +85,7 @@ export async function sendInvoiceEmail(
         promo_code: order.promoCode || "",
         order_items: formatOrderItems(order),
         shipping_address: order.shippingAddress,
+        shipping_addess: order.shippingAddress,
       },
     }),
   });
@@ -71,7 +94,10 @@ export async function sendInvoiceEmail(
     const message = await response.text();
     return {
       sent: false,
-      message: message || "EmailJS could not send the invoice.",
+      message:
+        message === "Account not found"
+          ? "EmailJS account not found. Check EMAILJS_PUBLIC_KEY matches your EmailJS Public Key, not the service ID."
+          : message || "EmailJS could not send the invoice.",
     };
   }
 

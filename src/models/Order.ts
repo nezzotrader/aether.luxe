@@ -22,6 +22,11 @@ const OrderSchema = new Schema(
     customerEmail: { type: String, required: true, trim: true },
     customerPhone: { type: String, required: true, trim: true },
     shippingAddress: { type: String, required: true, trim: true },
+    shippingAddressLine1: { type: String, trim: true },
+    shippingAddressLine2: { type: String, trim: true },
+    shippingPostcode: { type: String, trim: true },
+    shippingCity: { type: String, trim: true },
+    shippingState: { type: String, trim: true },
     shippingCountry: {
       type: String,
       enum: ["Malaysia", "Singapore"],

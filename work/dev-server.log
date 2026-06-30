@@ -4,9 +4,7 @@
 
 ▲ Next.js 16.2.9 (Turbopack)
 - Local:         http://localhost:3000
-- Network:       http://192.168.1.2:3000
+- Network:       http://192.168.1.8:3000
 - Environments: .env.local
-✓ Ready in 647ms
+✓ Ready in 1686ms
 
- GET /admin 200 in 2.9s (next.js: 207ms, application-code: 2.7s)
- GET /api/auth/session 200 in 3.7s (next.js: 3.6s, application-code: 60ms)

@@ -48,6 +48,11 @@ export type Order = {
   customerEmail: string;
   customerPhone: string;
   shippingAddress: string;
+  shippingAddressLine1?: string;
+  shippingAddressLine2?: string;
+  shippingPostcode?: string;
+  shippingCity?: string;
+  shippingState?: string;
   shippingCountry: "Malaysia" | "Singapore";
   shippingFee: number;
   subtotal: number;
