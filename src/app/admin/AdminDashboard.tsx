@@ -89,6 +89,7 @@ export function AdminDashboard({
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [draggingImage, setDraggingImage] = useState<string | null>(null);
 
   const activeProducts = useMemo(
     () => products.filter((product) => product.isActive).length,
@@ -256,6 +257,61 @@ export function AdminDashboard({
       ...current,
       [field]: (current[field] || []).filter((item) => item !== value),
     }));
+  }
+
+  function moveProductImage(image: string, targetIndex: number) {
+    setProductForm((current) => {
+      const fromIndex = current.images.indexOf(image);
+
+      if (
+        fromIndex === -1 ||
+        targetIndex < 0 ||
+        targetIndex >= current.images.length ||
+        fromIndex === targetIndex
+      ) {
+        return current;
+      }
+
+      const images = [...current.images];
+      const [movedImage] = images.splice(fromIndex, 1);
+      images.splice(targetIndex, 0, movedImage);
+
+      return { ...current, images };
+    });
+  }
+
+  function startProductImageDrag(
+    event: React.PointerEvent<HTMLDivElement>,
+    image: string,
+  ) {
+    if (event.button !== 0) {
+      return;
+    }
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDraggingImage(image);
+  }
+
+  function updateProductImageDrag(event: React.PointerEvent<HTMLDivElement>) {
+    if (!draggingImage) {
+      return;
+    }
+
+    event.preventDefault();
+    const target = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest("[data-product-image-index]");
+    const targetIndex = Number(
+      (target as HTMLElement | null)?.dataset.productImageIndex,
+    );
+
+    if (Number.isInteger(targetIndex)) {
+      moveProductImage(draggingImage, targetIndex);
+    }
+  }
+
+  function endProductImageDrag() {
+    setDraggingImage(null);
   }
 
   async function deleteProduct(id: string) {
@@ -679,13 +735,34 @@ export function AdminDashboard({
                   Active on store
                 </label>
                 <input type="file" multiple accept="image/*" onChange={handleProductUpload} className="w-full rounded-md border border-white/10 bg-[#1a060b] p-3 text-sm text-white file:mr-4 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-semibold file:text-black" />
-                <p className="text-xs text-white/45">{uploading ? "Uploading..." : "Upload multiple catalog/detail images."}</p>
+                <p className="text-xs text-white/45">{uploading ? "Uploading..." : "Upload multiple catalog/detail images. Hold and drag thumbnails to reorder."}</p>
                 {productForm.images.length ? (
                   <div className="grid grid-cols-4 gap-2">
-                    {productForm.images.map((image) => (
-                      <div key={image} className="relative aspect-square overflow-hidden rounded-md bg-[#1b1011]">
+                    {productForm.images.map((image, index) => (
+                      <div
+                        key={image}
+                        data-product-image-index={index}
+                        onPointerDown={(event) => startProductImageDrag(event, image)}
+                        onPointerMove={updateProductImageDrag}
+                        onPointerUp={endProductImageDrag}
+                        onPointerCancel={endProductImageDrag}
+                        className={`relative aspect-square touch-none overflow-hidden rounded-md bg-[#1b1011] transition ${
+                          draggingImage === image
+                            ? "scale-95 cursor-grabbing opacity-70 ring-2 ring-white/60"
+                            : "cursor-grab ring-1 ring-white/0 hover:ring-white/25"
+                        }`}
+                        title="Hold and drag to reorder"
+                      >
                         <Image src={image} alt="" fill sizes="80px" className="object-cover" />
-                        <button type="button" onClick={() => setProductForm((current) => ({ ...current, images: current.images.filter((item) => item !== image) }))} className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-black/70 text-white">
+                        <div className="absolute bottom-1 left-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white/80">
+                          {index + 1}
+                        </div>
+                        <button
+                          type="button"
+                          onPointerDown={(event) => event.stopPropagation()}
+                          onClick={() => setProductForm((current) => ({ ...current, images: current.images.filter((item) => item !== image) }))}
+                          className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-black/70 text-white"
+                        >
                           <X className="size-3" />
                         </button>
                       </div>
