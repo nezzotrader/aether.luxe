@@ -10,7 +10,11 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product }: ProductCardProps) {
-  const hasOptions = Boolean(product.colors?.length || product.sizes?.length);
+  const hasOptions = Boolean(
+    product.colors?.length ||
+      product.sizes?.length ||
+      product.customOptions?.length,
+  );
 
   return (
     <article className="group overflow-hidden rounded-lg border border-white/10 bg-[#160409] transition hover:border-white/25">

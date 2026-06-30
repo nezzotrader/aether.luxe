@@ -133,7 +133,7 @@ export default async function Home({ searchParams }: HomeProps) {
               {products.map((product) => (
                 <div
                   key={product._id}
-                  className="w-[calc(50%-0.375rem)] min-w-[calc(50%-0.375rem)] snap-start sm:w-auto sm:min-w-0"
+                  className="w-[40%] min-w-[40%] snap-start sm:w-auto sm:min-w-0"
                 >
                   <ProductCard product={product} />
                 </div>
