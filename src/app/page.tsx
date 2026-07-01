@@ -5,8 +5,8 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { Pagination } from "@/components/Pagination";
 import { ProductCard } from "@/components/ProductCard";
-import { CATEGORIES } from "@/lib/constants";
 import { getBrands } from "@/lib/brands";
+import { getCategories } from "@/lib/categories";
 import { getProducts } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
@@ -40,8 +40,9 @@ export default async function Home({ searchParams }: HomeProps) {
     }
   }
 
-  const [brands, productResult] = await Promise.all([
+  const [brands, categories, productResult] = await Promise.all([
     getBrands({ activeOnly: true }),
+    getCategories({ activeOnly: true }),
     getProducts({
       search,
       brand,
@@ -88,16 +89,16 @@ export default async function Home({ searchParams }: HomeProps) {
               <Grid2X2 className="size-4" aria-hidden="true" />
               All
             </Link>
-            {CATEGORIES.map((item, index) => {
+            {categories.map((item, index) => {
               const Icon = CATEGORY_ICONS[index % CATEGORY_ICONS.length];
               return (
                 <Link
-                  key={item}
-                  href={`/?category=${encodeURIComponent(item)}#catalog`}
+                  key={item._id}
+                  href={`/?category=${encodeURIComponent(item.name)}#catalog`}
                   className="inline-flex h-12 min-w-32 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/75 transition hover:border-white/30 hover:text-white"
                 >
                   <Icon className="size-4" aria-hidden="true" />
-                  {item}
+                  {item.name}
                 </Link>
               );
             })}
@@ -126,6 +127,7 @@ export default async function Home({ searchParams }: HomeProps) {
             category={category}
             sort={sort}
             brands={brands}
+            categories={categories}
           />
 
           {products.length ? (

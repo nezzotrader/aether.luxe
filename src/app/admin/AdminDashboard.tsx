@@ -16,25 +16,35 @@ import {
   Plus,
   Save,
   ShoppingBag,
+  Tags,
   Trash2,
   X,
 } from "lucide-react";
-import { CATEGORIES } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
-import type { Brand, Order, Product, ProductPayload, PromoCode } from "@/types/product";
+import type {
+  Brand,
+  Category,
+  Order,
+  Product,
+  ProductPayload,
+  PromoCode,
+} from "@/types/product";
+
+type AdminTab = "products" | "brands" | "categories" | "promos" | "orders";
 
 type AdminDashboardProps = {
   initialProducts: Product[];
   initialBrands: Brand[];
+  initialCategories: Category[];
   initialOrders: Order[];
   initialPromos: PromoCode[];
 };
 
-function makeEmptyProduct(brand = ""): ProductPayload {
+function makeEmptyProduct(brand = "", category = ""): ProductPayload {
   return {
     name: "",
     brand,
-    category: CATEGORIES[0],
+    category,
     price: 0,
     stock: 0,
     description: "",
@@ -63,22 +73,28 @@ function joinOptions(value?: string[]) {
 export function AdminDashboard({
   initialProducts,
   initialBrands,
+  initialCategories,
   initialOrders,
   initialPromos,
 }: AdminDashboardProps) {
-  const [tab, setTab] = useState<"products" | "brands" | "promos" | "orders">("products");
+  const [tab, setTab] = useState<AdminTab>("products");
   const [products, setProducts] = useState(initialProducts);
   const [brands, setBrands] = useState(initialBrands);
+  const [categories, setCategories] = useState(initialCategories);
   const [orders, setOrders] = useState(initialOrders);
   const [promos, setPromos] = useState(initialPromos);
   const [productForm, setProductForm] = useState<ProductPayload>(
-    makeEmptyProduct(initialBrands[0]?.name || ""),
+    makeEmptyProduct(initialBrands[0]?.name || "", initialCategories[0]?.name || ""),
   );
   const [productColorInput, setProductColorInput] = useState("");
   const [productSizeInput, setProductSizeInput] = useState("");
   const [productCustomOptionName, setProductCustomOptionName] = useState("");
   const [productCustomOptionValues, setProductCustomOptionValues] = useState("");
   const [brandForm, setBrandForm] = useState({ name: "", isActive: true });
+  const [categoryForm, setCategoryForm] = useState({
+    name: "",
+    isActive: true,
+  });
   const [promoForm, setPromoForm] = useState({
     code: "",
     type: "fixed" as PromoCode["type"],
@@ -88,8 +104,12 @@ export function AdminDashboard({
     oneUsePerEmail: false,
   });
   const [productFormMode, setProductFormMode] = useState<"add" | "edit" | null>(null);
+  const [brandFormMode, setBrandFormMode] = useState<"add" | "edit" | null>(null);
+  const [categoryFormMode, setCategoryFormMode] = useState<"add" | "edit" | null>(null);
+  const [promoFormMode, setPromoFormMode] = useState<"add" | "edit" | null>(null);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [editingPromoId, setEditingPromoId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
@@ -120,6 +140,12 @@ export function AdminDashboard({
     setBrands(data.brands || []);
   }
 
+  async function refreshCategories() {
+    const response = await fetch("/api/categories");
+    const data = await response.json();
+    setCategories(data.categories || []);
+  }
+
   async function refreshOrders() {
     const response = await fetch("/api/orders");
     const data = await response.json();
@@ -135,7 +161,9 @@ export function AdminDashboard({
   function resetProductForm() {
     setEditingProductId(null);
     setProductFormMode(null);
-    setProductForm(makeEmptyProduct(brands[0]?.name || ""));
+    setProductForm(
+      makeEmptyProduct(brands[0]?.name || "", categories[0]?.name || ""),
+    );
     setProductColorInput("");
     setProductSizeInput("");
     setProductCustomOptionName("");
@@ -145,7 +173,9 @@ export function AdminDashboard({
   function addProduct() {
     setEditingProductId(null);
     setProductFormMode("add");
-    setProductForm(makeEmptyProduct(brands[0]?.name || ""));
+    setProductForm(
+      makeEmptyProduct(brands[0]?.name || "", categories[0]?.name || ""),
+    );
     setProductColorInput("");
     setProductSizeInput("");
     setProductCustomOptionName("");
@@ -155,11 +185,45 @@ export function AdminDashboard({
 
   function resetBrandForm() {
     setEditingBrandId(null);
+    setBrandFormMode(null);
     setBrandForm({ name: "", isActive: true });
+  }
+
+  function addBrand() {
+    setEditingBrandId(null);
+    setBrandFormMode("add");
+    setBrandForm({ name: "", isActive: true });
+  }
+
+  function resetCategoryForm() {
+    setEditingCategoryId(null);
+    setCategoryFormMode(null);
+    setCategoryForm({ name: "", isActive: true });
+  }
+
+  function addCategory() {
+    setEditingCategoryId(null);
+    setCategoryFormMode("add");
+    setCategoryForm({ name: "", isActive: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function resetPromoForm() {
     setEditingPromoId(null);
+    setPromoFormMode(null);
+    setPromoForm({
+      code: "",
+      type: "fixed",
+      value: 0,
+      minSpend: 0,
+      isActive: true,
+      oneUsePerEmail: false,
+    });
+  }
+
+  function addPromo() {
+    setEditingPromoId(null);
+    setPromoFormMode("add");
     setPromoForm({
       code: "",
       type: "fixed",
@@ -446,6 +510,53 @@ export function AdminDashboard({
     await refreshBrands();
   }
 
+  async function saveCategory(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+    setMessage("");
+    const response = await fetch(
+      editingCategoryId
+        ? `/api/categories/${editingCategoryId}`
+        : "/api/categories",
+      {
+        method: editingCategoryId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(categoryForm),
+      },
+    );
+    const data = await response.json();
+    setSaving(false);
+
+    if (!response.ok) {
+      setMessage(data.message || "Category could not be saved.");
+      return;
+    }
+
+    resetCategoryForm();
+    await refreshCategories();
+    setMessage("Category saved.");
+  }
+
+  async function deleteCategory(id: string) {
+    if (
+      !window.confirm(
+        "Delete this category? Existing product category names stay unchanged.",
+      )
+    ) {
+      return;
+    }
+
+    const response = await fetch(`/api/categories/${id}`, { method: "DELETE" });
+
+    if (!response.ok) {
+      const data = await response.json();
+      setMessage(data.message || "Category could not be deleted.");
+      return;
+    }
+
+    await refreshCategories();
+  }
+
   async function savePromo(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
@@ -566,10 +677,11 @@ export function AdminDashboard({
             Admin Panel
           </p>
         </div>
-        <nav className="mt-4 grid grid-cols-3 gap-2 lg:grid-cols-1">
+        <nav className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1">
           {[
             ["products", "Products", Boxes],
             ["brands", "Brands", Building2],
+            ["categories", "Categories", Tags],
             ["promos", "Promos", Percent],
             ["orders", "Orders", ShoppingBag],
           ].map(([value, label, Icon]) => {
@@ -578,7 +690,7 @@ export function AdminDashboard({
               <button
                 key={value as string}
                 type="button"
-                onClick={() => setTab(value as "products" | "brands" | "promos" | "orders")}
+                onClick={() => setTab(value as AdminTab)}
                 className={`inline-flex h-11 items-center justify-center gap-2 rounded-md px-3 text-sm lg:justify-start ${
                   tab === value
                     ? "bg-[#7f1730] text-white"
@@ -617,9 +729,11 @@ export function AdminDashboard({
                 ? "Products"
                 : tab === "brands"
                   ? "Brands"
-                  : tab === "promos"
-                    ? "Promos"
-                    : "Orders"}
+                  : tab === "categories"
+                    ? "Categories"
+                    : tab === "promos"
+                      ? "Promos"
+                      : "Orders"}
             </h1>
           </div>
           <Link
@@ -807,13 +921,24 @@ export function AdminDashboard({
 
             {productFormMode ? (
             <form onSubmit={saveProduct} className="order-first rounded-lg border border-white/10 bg-[#120407] p-5 shadow-2xl shadow-black/30">
-              <div className="mb-5 flex items-center justify-between">
+              <div className="mb-5 flex items-center justify-between gap-3">
                 <h2 className="font-display text-3xl font-semibold text-white">
                   {editingProductId ? "Edit Product" : "Add Product"}
                 </h2>
-                <button type="button" onClick={resetProductForm} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/65">
-                  <X className="size-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button type="submit" disabled={saving || uploading} className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-[#7f1730] px-3 text-xs font-semibold text-white disabled:opacity-55 sm:px-4">
+                    {editingProductId ? <Save className="size-4" /> : <Plus className="size-4" />}
+                    <span className="hidden min-[420px]:inline">
+                      {saving ? "Saving..." : editingProductId ? "Save Changes" : "Save Product"}
+                    </span>
+                    <span className="min-[420px]:hidden">
+                      {saving ? "Saving" : "Save"}
+                    </span>
+                  </button>
+                  <button type="button" onClick={resetProductForm} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/65">
+                    <X className="size-4" />
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -825,14 +950,15 @@ export function AdminDashboard({
                     ))}
                   </select>
                   <select value={productForm.category} onChange={(event) => setProductForm({ ...productForm, category: event.target.value })} className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white">
-                    {CATEGORIES.map((category) => (
-                      <option key={category} value={category}>{category}</option>
+                    <option value="" disabled>Category</option>
+                    {categories.map((category) => (
+                      <option key={category._id} value={category.name}>{category.name}</option>
                     ))}
                   </select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <input type="number" min="0" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: Number(event.target.value) })} required placeholder="Price" className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white" />
-                  <input type="number" min="0" value={productForm.stock} onChange={(event) => setProductForm({ ...productForm, stock: Number(event.target.value) })} required placeholder="Units in stock" className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white" />
+                  <input type="number" min="0" value={productForm.stock || ""} onChange={(event) => setProductForm({ ...productForm, stock: Number(event.target.value) })} required placeholder="Stock in Unit" className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white placeholder:text-white/35" />
                 </div>
                 <div className="rounded-md border border-white/10 bg-black/20 p-3">
                   <div className="mb-3 flex items-center justify-between">
@@ -995,19 +1121,25 @@ export function AdminDashboard({
                 ) : null}
               </div>
 
-              <button type="submit" disabled={saving || uploading} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-[#7f1730] text-sm font-semibold text-white disabled:opacity-55">
-                {editingProductId ? <Save className="size-4" /> : <Plus className="size-4" />}
-                {saving ? "Saving..." : "Save Product"}
-              </button>
             </form>
             ) : null}
           </div>
         ) : null}
 
         {tab === "brands" ? (
-          <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+          <div className="grid gap-6">
             <div className="rounded-lg border border-white/10 bg-[#120407] p-4">
-              <h2 className="font-display text-3xl text-white">Brands</h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-display text-3xl text-white">Brands</h2>
+                <button
+                  type="button"
+                  onClick={addBrand}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-white px-4 text-xs font-semibold uppercase tracking-[0.12em] text-black transition hover:bg-[#d9d9d9]"
+                >
+                  <Plus className="size-4" aria-hidden="true" />
+                  Add Brand
+                </button>
+              </div>
               <div className="mt-4 grid gap-2">
                 {brands.map((brand) => (
                   <div key={brand._id} className="flex items-center justify-between rounded-md border border-white/10 p-3">
@@ -1016,7 +1148,7 @@ export function AdminDashboard({
                       <p className="text-xs text-white/45">{brand.isActive ? "Active" : "Inactive"}</p>
                     </div>
                     <div className="flex gap-2">
-                      <button type="button" onClick={() => { setEditingBrandId(brand._id); setBrandForm({ name: brand.name, isActive: brand.isActive }); }} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70">
+                      <button type="button" onClick={() => { setEditingBrandId(brand._id); setBrandFormMode("edit"); setBrandForm({ name: brand.name, isActive: brand.isActive }); }} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70">
                         <Pencil className="size-4" />
                       </button>
                       <button type="button" onClick={() => deleteBrand(brand._id)} className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70">
@@ -1027,7 +1159,8 @@ export function AdminDashboard({
                 ))}
               </div>
             </div>
-            <form onSubmit={saveBrand} className="rounded-lg border border-white/10 bg-[#120407] p-5">
+            {brandFormMode ? (
+            <form onSubmit={saveBrand} className="order-first rounded-lg border border-white/10 bg-[#120407] p-5">
               <h2 className="font-display text-3xl text-white">{editingBrandId ? "Edit Brand" : "Add Brand"}</h2>
               <input value={brandForm.name} onChange={(event) => setBrandForm({ ...brandForm, name: event.target.value })} required placeholder="Brand name" className="mt-4 h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white" />
               <label className="mt-4 flex items-center gap-2 text-sm text-white/70">
@@ -1039,13 +1172,137 @@ export function AdminDashboard({
                 <button type="submit" disabled={saving} className="h-11 rounded-md bg-[#7f1730] text-sm font-semibold text-white">Save Brand</button>
               </div>
             </form>
+            ) : null}
+          </div>
+        ) : null}
+
+        {tab === "categories" ? (
+          <div className="grid gap-6">
+            <div className="rounded-lg border border-white/10 bg-[#120407] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-display text-3xl text-white">Categories</h2>
+                <button
+                  type="button"
+                  onClick={addCategory}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-white px-4 text-xs font-semibold uppercase tracking-[0.12em] text-black transition hover:bg-[#d9d9d9]"
+                >
+                  <Plus className="size-4" aria-hidden="true" />
+                  Add Category
+                </button>
+              </div>
+              <div className="mt-4 grid gap-2">
+                {categories.map((category) => (
+                  <div
+                    key={category._id}
+                    className="flex items-center justify-between rounded-md border border-white/10 p-3"
+                  >
+                    <div>
+                      <p className="text-white">{category.name}</p>
+                      <p className="text-xs text-white/45">
+                        {category.isActive ? "Active" : "Inactive"}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCategoryId(category._id);
+                          setCategoryFormMode("edit");
+                          setCategoryForm({
+                            name: category.name,
+                            isActive: category.isActive,
+                          });
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70"
+                      >
+                        <Pencil className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteCategory(category._id)}
+                        className="grid size-9 place-items-center rounded-md border border-white/10 text-white/70"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {!categories.length ? (
+                  <p className="rounded-md border border-white/10 p-4 text-sm text-white/50">
+                    No categories yet.
+                  </p>
+                ) : null}
+              </div>
+            </div>
+            {categoryFormMode ? (
+              <form
+                onSubmit={saveCategory}
+                className="order-first rounded-lg border border-white/10 bg-[#120407] p-5"
+              >
+                <h2 className="font-display text-3xl text-white">
+                  {editingCategoryId ? "Edit Category" : "Add Category"}
+                </h2>
+                <input
+                  value={categoryForm.name}
+                  onChange={(event) =>
+                    setCategoryForm({
+                      ...categoryForm,
+                      name: event.target.value,
+                    })
+                  }
+                  required
+                  placeholder="Category name"
+                  className="mt-4 h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white"
+                />
+                <label className="mt-4 flex items-center gap-2 text-sm text-white/70">
+                  <input
+                    type="checkbox"
+                    checked={categoryForm.isActive}
+                    onChange={(event) =>
+                      setCategoryForm({
+                        ...categoryForm,
+                        isActive: event.target.checked,
+                      })
+                    }
+                  />
+                  Active on store
+                </label>
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={resetCategoryForm}
+                    className="h-11 rounded-md border border-white/10 text-sm text-white/70"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="h-11 rounded-md bg-[#7f1730] text-sm font-semibold text-white"
+                  >
+                    Save Category
+                  </button>
+                </div>
+              </form>
+            ) : null}
           </div>
         ) : null}
 
         {tab === "promos" ? (
-          <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+          <div className="grid gap-6">
             <div className="rounded-lg border border-white/10 bg-[#120407] p-4">
-              <h2 className="font-display text-3xl text-white">Promo Codes</h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-display text-3xl text-white">Promo Codes</h2>
+                <button
+                  type="button"
+                  onClick={addPromo}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-white px-4 text-xs font-semibold uppercase tracking-[0.12em] text-black transition hover:bg-[#d9d9d9]"
+                >
+                  <Plus className="size-4" aria-hidden="true" />
+                  Add Promo
+                </button>
+              </div>
               <div className="mt-4 grid gap-2">
                 {promos.map((promo) => (
                   <div
@@ -1070,6 +1327,7 @@ export function AdminDashboard({
                         type="button"
                         onClick={() => {
                           setEditingPromoId(promo._id);
+                          setPromoFormMode("edit");
                           setPromoForm({
                             code: promo.code,
                             type: promo.type,
@@ -1100,9 +1358,10 @@ export function AdminDashboard({
                 ) : null}
               </div>
             </div>
+            {promoFormMode ? (
             <form
               onSubmit={savePromo}
-              className="rounded-lg border border-white/10 bg-[#120407] p-5"
+              className="order-first rounded-lg border border-white/10 bg-[#120407] p-5"
             >
               <h2 className="font-display text-3xl text-white">
                 {editingPromoId ? "Edit Promo" : "Add Promo"}
@@ -1146,22 +1405,31 @@ export function AdminDashboard({
                   placeholder={
                     promoForm.type === "free_shipping" ? "Auto" : "Promo value"
                   }
-                  className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white"
+                  className={`h-11 rounded-md border px-3 text-sm outline-none ${
+                    promoForm.type === "free_shipping"
+                      ? "cursor-not-allowed border-white/5 bg-white/10 text-white/35"
+                      : "border-white/10 bg-[#1a060b] text-white"
+                  }`}
                 />
               </div>
-              <input
-                type="number"
-                min="0"
-                value={promoForm.minSpend}
-                onChange={(event) =>
-                  setPromoForm({
-                    ...promoForm,
-                    minSpend: Number(event.target.value),
-                  })
-                }
-                placeholder="Minimum spend (optional)"
-                className="mt-3 h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white"
-              />
+              <label className="mt-3 block space-y-2">
+                <span className="text-xs uppercase tracking-[0.2em] text-white/45">
+                  Min spend
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  value={promoForm.minSpend}
+                  onChange={(event) =>
+                    setPromoForm({
+                      ...promoForm,
+                      minSpend: Number(event.target.value),
+                    })
+                  }
+                  placeholder="Minimum spend (optional)"
+                  className="h-11 w-full rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white"
+                />
+              </label>
               <label className="mt-4 flex items-center gap-2 text-sm text-white/70">
                 <input
                   type="checkbox"
@@ -1208,6 +1476,7 @@ export function AdminDashboard({
                 </button>
               </div>
             </form>
+            ) : null}
           </div>
         ) : null}
 

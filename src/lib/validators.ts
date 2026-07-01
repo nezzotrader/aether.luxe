@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { CATEGORIES, PAYMENT_METHODS, SHIPPING_COUNTRIES } from "./constants";
+import { PAYMENT_METHODS, SHIPPING_COUNTRIES } from "./constants";
 
 export const productSchema = z.object({
   name: z.string().trim().min(2, "Product name is required."),
   brand: z.string().trim().min(2, "Brand is required."),
-  category: z.enum(CATEGORIES),
+  category: z.string().trim().min(1, "Category is required."),
   price: z.coerce.number().nonnegative("Price must be 0 or higher."),
   stock: z.coerce.number().int().nonnegative("Stock must be 0 or higher.").default(0),
   description: z.string().trim().min(10, "Description is required."),
@@ -21,6 +21,11 @@ export const productSchema = z.object({
 
 export const brandSchema = z.object({
   name: z.string().trim().min(2, "Brand name is required."),
+  isActive: z.boolean().default(true),
+});
+
+export const categorySchema = z.object({
+  name: z.string().trim().min(2, "Category name is required."),
   isActive: z.boolean().default(true),
 });
 

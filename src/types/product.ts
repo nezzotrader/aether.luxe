@@ -37,6 +37,13 @@ export type Brand = {
   createdAt: string;
 };
 
+export type Category = {
+  _id: string;
+  name: string;
+  isActive: boolean;
+  createdAt: string;
+};
+
 export type CartItem = {
   cartItemId: string;
   productId: string;

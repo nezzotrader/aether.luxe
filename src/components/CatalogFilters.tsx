@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { CATEGORIES, SORT_OPTIONS } from "@/lib/constants";
-import type { Brand } from "@/types/product";
+import { SORT_OPTIONS } from "@/lib/constants";
+import type { Brand, Category } from "@/types/product";
 
 type CatalogFiltersProps = {
   search?: string;
@@ -8,17 +8,8 @@ type CatalogFiltersProps = {
   category?: string;
   sort?: string;
   brands: Brand[];
+  categories: Category[];
 };
-
-const COLLECTION_CHIPS = [
-  { label: "All", href: "/#catalog" },
-  { label: "Bestselling", href: "/?sort=newest#catalog" },
-  { label: "New arrivals", href: "/?sort=newest#catalog" },
-  { label: "Bags", href: "/?category=Bags#catalog" },
-  { label: "Shoes", href: "/?category=Shoes#catalog" },
-  { label: "Accessories", href: "/?category=Accessories#catalog" },
-  { label: "Watches", href: "/?category=Watches#catalog" },
-];
 
 export function CatalogFilters({
   search = "",
@@ -26,11 +17,22 @@ export function CatalogFilters({
   category = "",
   sort = "newest",
   brands,
+  categories,
 }: CatalogFiltersProps) {
+  const collectionChips = [
+    { label: "All", href: "/#catalog" },
+    { label: "Bestselling", href: "/?sort=newest#catalog" },
+    { label: "New arrivals", href: "/?sort=newest#catalog" },
+    ...categories.slice(0, 5).map((item) => ({
+      label: item.name,
+      href: `/?category=${encodeURIComponent(item.name)}#catalog`,
+    })),
+  ];
+
   return (
     <div id="catalog" className="border-y border-white/10 py-3 sm:py-5">
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
-        {COLLECTION_CHIPS.map((chip) => (
+        {collectionChips.map((chip) => (
           <Link
             key={chip.label}
             href={chip.href}
@@ -71,9 +73,9 @@ export function CatalogFilters({
             className="h-8 w-full min-w-0 rounded-md border border-white/10 bg-[#111111] px-1.5 text-[11px] text-white outline-none focus:border-white/35 sm:h-11 sm:px-3 sm:text-sm"
           >
             <option value="">All categories</option>
-            {CATEGORIES.map((item) => (
-              <option key={item} value={item}>
-                {item}
+            {categories.map((item) => (
+              <option key={item._id} value={item.name}>
+                {item.name}
               </option>
             ))}
           </select>
