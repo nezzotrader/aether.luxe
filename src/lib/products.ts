@@ -10,6 +10,7 @@ type ProductDocument = {
   brand: string;
   category: string;
   price: number;
+  stock?: number;
   description: string;
   productCode: string;
   images: string[];
@@ -41,6 +42,7 @@ export function serializeProduct(
     brand: product.brand,
     category: product.category,
     price: product.price,
+    stock: product.stock ?? 0,
     description: product.description,
     productCode: product.productCode,
     images: product.images,

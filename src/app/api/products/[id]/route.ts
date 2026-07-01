@@ -31,7 +31,10 @@ export async function PUT(request: Request, context: ProductRouteContext) {
 
   const { id } = await context.params;
   await connectToDatabase();
-  const product = await ProductModel.findByIdAndUpdate(id, parsed.data, {
+  const { productCode, ...productData } = parsed.data;
+  const update = productCode ? { ...productData, productCode } : productData;
+
+  const product = await ProductModel.findByIdAndUpdate(id, update, {
     new: true,
     runValidators: true,
   });

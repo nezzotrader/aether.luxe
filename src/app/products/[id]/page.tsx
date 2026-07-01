@@ -61,9 +61,9 @@ export default async function ProductDetails({ params }: ProductDetailsProps) {
 
             <dl className="mt-8 grid grid-cols-2 gap-3 border-y border-white/10 py-6 text-sm">
               <div>
-                <dt className="text-white/40">Product code</dt>
+                <dt className="text-white/40">Stock</dt>
                 <dd className="mt-1 font-medium text-white">
-                  {product.productCode}
+                  {product.stock} units
                 </dd>
               </div>
               <div>

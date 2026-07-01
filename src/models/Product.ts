@@ -14,6 +14,7 @@ const ProductSchema = new Schema(
     brand: { type: String, required: true, trim: true },
     category: { type: String, required: true, trim: true },
     price: { type: Number, required: true, min: 0 },
+    stock: { type: Number, default: 0, min: 0 },
     description: { type: String, required: true, trim: true },
     productCode: { type: String, required: true, unique: true, trim: true },
     images: [{ type: String, required: true }],
@@ -34,7 +35,11 @@ ProductSchema.index({
 });
 ProductSchema.index({ brand: 1, category: 1, createdAt: -1 });
 
-if (models.Product && !models.Product.schema.path("customOptions")) {
+if (
+  models.Product &&
+  (!models.Product.schema.path("customOptions") ||
+    !models.Product.schema.path("stock"))
+) {
   deleteModel("Product");
 }
 

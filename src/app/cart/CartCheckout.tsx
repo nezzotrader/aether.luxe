@@ -188,7 +188,6 @@ export function CartCheckout() {
                   <h2 className="mt-1 font-display text-2xl font-semibold text-white">
                     {item.name}
                   </h2>
-                  <p className="mt-1 text-sm text-white/50">{item.productCode}</p>
                   {item.color || item.size ? (
                     <p className="mt-1 text-sm text-white/45">
                       {[item.color ? `Colour / Design: ${item.color}` : "", item.size ? `Size: ${item.size}` : ""]

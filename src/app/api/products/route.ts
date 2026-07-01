@@ -8,6 +8,10 @@ import { ProductModel } from "@/models/Product";
 
 export const runtime = "nodejs";
 
+function createInternalProductCode() {
+  return `AETHER-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`.toUpperCase();
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const result = await getProducts({
@@ -42,7 +46,10 @@ export async function POST(request: Request) {
   }
 
   await connectToDatabase();
-  const product = await ProductModel.create(parsed.data);
+  const product = await ProductModel.create({
+    ...parsed.data,
+    productCode: parsed.data.productCode || createInternalProductCode(),
+  });
 
   return NextResponse.json(
     { product: serializeProduct(product.toObject()) },

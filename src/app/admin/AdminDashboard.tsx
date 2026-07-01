@@ -36,6 +36,7 @@ function makeEmptyProduct(brand = ""): ProductPayload {
     brand,
     category: CATEGORIES[0],
     price: 0,
+    stock: 0,
     description: "",
     productCode: "",
     images: [],
@@ -238,6 +239,7 @@ export function AdminDashboard({
       brand: product.brand,
       category: product.category,
       price: product.price,
+      stock: product.stock ?? 0,
       description: product.description,
       productCode: product.productCode,
       images: product.images,
@@ -674,7 +676,7 @@ export function AdminDashboard({
                               {product.name}
                             </p>
                             <p className="mt-1 text-[11px] uppercase tracking-[0.12em] text-white/35">
-                              SKU: {product.productCode}
+                              Stock: {product.stock ?? 0} units
                             </p>
                           </div>
                           <span
@@ -767,7 +769,7 @@ export function AdminDashboard({
                             </div>
                             <div>
                               <p className="font-medium text-white">{product.name}</p>
-                              <p className="text-xs text-white/40">SKU: {product.productCode}</p>
+                              <p className="text-xs text-white/40">Stock: {product.stock ?? 0} units</p>
                               {product.colors?.length || product.sizes?.length || product.customOptions?.length ? (
                                 <p className="mt-1 text-xs text-white/35">
                                   {[product.colors?.length ? `Colour / Design: ${joinOptions(product.colors)}` : "", product.sizes?.length ? `Sizes: ${joinOptions(product.sizes)}` : "", product.customOptions?.length ? product.customOptions.map((option) => `${option.name}: ${joinOptions(option.values)}`).join(" / ") : ""]
@@ -830,7 +832,7 @@ export function AdminDashboard({
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <input type="number" min="0" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: Number(event.target.value) })} required placeholder="Price" className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white" />
-                  <input value={productForm.productCode} onChange={(event) => setProductForm({ ...productForm, productCode: event.target.value })} required placeholder="SKU" className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white" />
+                  <input type="number" min="0" value={productForm.stock} onChange={(event) => setProductForm({ ...productForm, stock: Number(event.target.value) })} required placeholder="Units in stock" className="h-11 rounded-md border border-white/10 bg-[#1a060b] px-3 text-sm text-white" />
                 </div>
                 <div className="rounded-md border border-white/10 bg-black/20 p-3">
                   <div className="mb-3 flex items-center justify-between">

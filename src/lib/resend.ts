@@ -89,7 +89,7 @@ function renderItemRows(order: Order) {
         <tr>
           <td style="padding:18px 12px 18px 0;border-bottom:1px solid #242424;color:#FFFFFF;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;">
             <strong style="display:block;color:#FFFFFF;font-size:15px;font-weight:600;letter-spacing:0.2px;">${escapeHtml(item.name)}</strong>
-            <span style="display:block;margin-top:4px;color:#A9A9A9;font-size:12px;line-height:18px;">${escapeHtml(item.brand)} / SKU ${escapeHtml(item.productCode)}</span>
+            <span style="display:block;margin-top:4px;color:#A9A9A9;font-size:12px;line-height:18px;">${escapeHtml(item.brand)}</span>
             ${options ? `<span style="display:block;margin-top:4px;color:#D4AF37;font-size:12px;line-height:18px;">${escapeHtml(options)}</span>` : ""}
           </td>
           <td align="center" style="padding:18px 8px;border-bottom:1px solid #242424;color:#FFFFFF;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;">
